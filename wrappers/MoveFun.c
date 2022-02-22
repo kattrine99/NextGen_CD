@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <wiringPi.h>
 #include <softPwm.h>
+#include "MoveFun.h"
 
 #define IN1_PIN		1
 #define IN2_PIN		4
@@ -10,34 +11,6 @@
 #define MAX_SPEED 50
 #define MIN_SPEED 0
 
-//official
-
-void initDCMotor();
-
-void goForward();
-void goBackward();
-
-void slow();
-
-void goLeft();
-void goRight();
-
-void smoothLeft();
-void smoothBackLeft();
-
-void smoothRight();
-void smoothBackRight();
-
-void stopDCMotor();
-
-//
-
-
-//custom
-
-void initPinMode();
-
-//
 
 void initPinMode(){
 	pinMode(IN1_PIN, OUTPUT);
