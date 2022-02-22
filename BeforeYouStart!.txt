@@ -1,0 +1,8 @@
+To launch the .sh script you are required to do 1 thing
+
+1. In terminal switch to current directory
+2. type 'chmod +x launch.sh' to allow system execute the file
+3. to start a program type in terminal 'sh launch.sh'
+
+
+Note! when you finish your work, do not forget to type 'sudo shutdown -h now' in terminal in order to proparly shutdown the system without errors.) 

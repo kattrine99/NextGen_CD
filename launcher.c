@@ -1,6 +1,7 @@
 #include <stdio.h>
+
 #include <wiringPi.h>
-#include "MoveFun.h"
+#include "wrappers/MoveFun.h"
 
 int cntr = 1;
 
