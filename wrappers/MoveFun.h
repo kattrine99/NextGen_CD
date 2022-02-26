@@ -13,6 +13,19 @@ void smoothRight();
 void smoothBackRight();
 void stopDCMotor();
 void initPinMode();
+void initDCMotorPWM();
+void goForwardPWM();
+void goBackwardPWM();
+void stopDCMotorPWM();
+
+//wrappers
+void wGoForwardPwm(int time);
+void wGoBackwardPwm(int time);
+void wSmoothRight(int time);
+void wSmoothLeft(int time);
+void wGoRight(int time);
+void wGoLeft(int time);
+
 
 
 #endif 
