@@ -28,6 +28,7 @@ void initDCMotor()
 }
 
 
+
 void goForward()
 {
 		digitalWrite(IN1_PIN, HIGH);
@@ -76,12 +77,10 @@ void stopDCMotor()
 }
 
 void slow(){
-  
 softPwmWrite(IN1_PIN, 30);
 softPwmWrite(IN2_PIN, MIN_SPEED);
 softPwmWrite(IN3_PIN, 30);
 softPwmWrite(IN4_PIN, MIN_SPEED);
-
 }
 
 void smoothLeft() {
@@ -111,4 +110,74 @@ softPwmWrite(IN1_PIN, MIN_SPEED);
 softPwmWrite(IN2_PIN, MAX_SPEED); 
 softPwmWrite(IN3_PIN, MIN_SPEED);
 softPwmWrite(IN4_PIN, MAX_SPEED/8);
+}
+
+void initDCMotorPWM()
+{
+pinMode(IN1_PIN,SOFT_PWM_OUTPUT);
+pinMode(IN2_PIN,SOFT_PWM_OUTPUT);
+pinMode(IN3_PIN,SOFT_PWM_OUTPUT);
+pinMode(IN4_PIN,SOFT_PWM_OUTPUT);
+ 
+softPwmCreate(IN1_PIN, MIN_SPEED, MAX_SPEED);
+softPwmCreate(IN2_PIN, MIN_SPEED, MAX_SPEED);
+softPwmCreate(IN3_PIN, MIN_SPEED, MAX_SPEED);
+softPwmCreate(IN4_PIN, MIN_SPEED, MAX_SPEED);
+}
+
+void goForwardPWM()
+{	
+softPwmWrite(IN1_PIN, MAX_SPEED);
+softPwmWrite(IN2_PIN, MIN_SPEED);
+softPwmWrite(IN3_PIN, MAX_SPEED);
+softPwmWrite(IN4_PIN, MIN_SPEED);
+}
+
+void goBackwardPWM()	
+{
+softPwmWrite(IN1_PIN, MIN_SPEED);
+softPwmWrite(IN2_PIN, MAX_SPEED);
+softPwmWrite(IN3_PIN, MIN_SPEED);
+softPwmWrite(IN4_PIN, MAX_SPEED);
+}
+
+void stopDCMotorPWM()
+{
+softPwmWrite(IN1_PIN, MIN_SPEED);
+softPwmWrite(IN2_PIN, MIN_SPEED);
+softPwmWrite(IN3_PIN, MIN_SPEED);
+softPwmWrite(IN4_PIN, MIN_SPEED);		
+printf("Stop\n");
+}
+
+
+// Wrapper functions for convinience
+
+void wGoForwardPwm(int time){
+	goForwardPWM();
+	delay(time);
+}	
+void wGoBackwardPwm(int time){
+	goBackwardPWM();
+	delay(time);
+}
+
+void wSmoothRight(int time){
+	smoothRight();
+	delay(time);
+}
+
+void wSmoothLeft(int time){
+	smoothLeft();
+	delay(time);
+}
+
+void wGoRight(int time){
+	goRight();
+	delay(time);
+}
+
+void wGoLeft(int time){
+	goLeft();
+	delay(time);
 }
