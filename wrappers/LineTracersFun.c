@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <wiringPi.h>
-#include <LineTracersFun.h>
+#include "LineTracersFun.h"
 
 
 #define LEFT_TRACER_PIN 10
@@ -13,8 +13,9 @@ void initLineTacer(){
 
 void lineTracerDetect(){
 	
- leftTracer = digitalRead(LEFT_TRACER_PIN);
- rightTracer = digitalRead(RIGHT_TRACER_PIN);
+	
+ int leftTracer = digitalRead(LEFT_TRACER_PIN);
+  int rightTracer = digitalRead(RIGHT_TRACER_PIN);
 	
 	
 	if (leftTracer == 0 && rightTracer == 1) {
