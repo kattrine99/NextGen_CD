@@ -20,9 +20,12 @@ int main(void){
 
     //Test Area
     //mission1(); // move forward for 1 sec
-    //mission2(); //forever meassure distance using ultrasonic sensor
+    mission2(); //forever meassure distance using ultrasonic sensor
     //mission3(); //forever meassure obstacles using IR sensers
     //mission5(); hw1
+    //mission4();
+    
+    //stopDCMotor();
 
 
     return 0;
@@ -92,86 +95,35 @@ void mission4(){
 
     initPinMode();
     initUltrasonic();
+    initDCMotorPWM();
 
     while(timesToLaunch){
 
         distance = getDistance();
+        printf("distance %dcm\n", distance);
 
-        if(distance < 30){
+        if(distance < 40){
             //Stop car
             stopDCMotor();
+            delay(100);
+            wSmoothRight(1000);
+            goForwardPWM();
+            delay(1000);
+            stopDCMotorPWM();
+            wSmoothLeft(2000);
+            stopDCMotorPWM();
+            
+            
 
         } else{
             //Continue to move
-            initDCMotor();
-            goForward();
-            delay(1000);
+            initDCMotorPWM();
+            goForwardPWM();
+            delay(100);
         }
     }
 }
 
-void mission5(){
-    int numberOfObjects = 4
-    int distance = 0;
-
-    initDCMotorPWM(); // Activate DC motor with PWM
-    initUltrasonic(); // Activate UltraSonic sensor
-    initIR(); // Activate IR sensor
 
 
-    while(1){
-        distance = getDistance();
 
-        if(distance < 25){
-            //Object A
-            if(numberOfObjects==4){
-                mission5AList1();
-                numberOfObjects--;
-            }
-
-            //Object B
-            if(numberOfObjects == 3){
-                mission5AList2();
-                numberOfObjects--;
-            }
-
-
-            //Object C
-            if(numberOfObjects == 2 ){
-                mission5AList2();
-                numberOfObjects--;
-            }
-
-
-            //Object D
-            if(numberOfObjects == 1){
-                mission5AList3();
-                numberOfObjects--;
-                stopDCMotorPWM();
-
-            }
-
-
-        } else {
-            //We did not get obstable continue
-            wGoForward(400);
-        }
-        delay(100);
-    }
-}
-
-void mission5AList1(){
-    wSmoothRight(1000);
-    wSmoothLeft(1000);
-}
-
-void mission5AList2(){
-    wSmoothRight(1000);
-    wGoLeft(500);
-    wGoForward(1000);
-    wSmoothLeft(1000);
-}
-void mission5AList3(){
-    wSmoothRight(1000);
-    wGoForward(1000);
-}
