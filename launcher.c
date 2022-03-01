@@ -6,6 +6,11 @@
 #include "wrappers/IRSenFun.h"
 #include "wrappers/LineTracersFun.h"
 
+#define LEFT_90 1300
+
+#define RIGHT_90 1152
+#define _60_CM 1300
+
 
 void mission1();
 void mission2();
@@ -20,10 +25,10 @@ int main(void){
 
     //Test Area
     //mission1(); // move forward for 1 sec
-    mission2(); //forever meassure distance using ultrasonic sensor
+    //mission2(); //forever meassure distance using ultrasonic sensor
     //mission3(); //forever meassure obstacles using IR sensers
     //mission5(); hw1
-    //mission4();
+    mission4();
     
     //stopDCMotor();
 
@@ -40,11 +45,14 @@ void mission1(){
 
         //Movement
         initPinMode();
-        initDCMotor();
-        goForward();
-        delay(1000);
+        initDCMotorPWM();
+        wSmoothLeft(LEFT_90);
+        
+        wSmoothRight(RIGHT_90);
+        
+        stopDCMotorPWM();
         stopDCMotor();
-        timesToLaunch--;
+        break;
     }
 }
 
@@ -96,21 +104,39 @@ void mission4(){
     initPinMode();
     initUltrasonic();
     initDCMotorPWM();
-
+    int counter = 0;
+    int smoothleft = 2300;
     while(timesToLaunch){
 
         distance = getDistance();
+        delay(100);
         printf("distance %dcm\n", distance);
-
-        if(distance < 40){
+        
+        if(counter == 2 | counter == 4 | counter == 6){
+                counter ++;
+                goForwardPWM();
+                delay(_60_CM);
+                
+                wSmoothLeft(smoothleft);
+                smoothleft  = smoothleft + 150 ;
+                }
+        
+        
+        if(distance < 30){
             //Stop car
             stopDCMotor();
-            delay(100);
-            wSmoothRight(1000);
+            
+            
+            wSmoothRight(1300);
             goForwardPWM();
-            delay(1000);
+            delay(600);
             stopDCMotorPWM();
-            wSmoothLeft(2000);
+            stopDCMotor();
+            wSmoothLeft(2100);
+            
+            
+            counter = counter + 1;
+                
             stopDCMotorPWM();
             
             
@@ -119,7 +145,7 @@ void mission4(){
             //Continue to move
             initDCMotorPWM();
             goForwardPWM();
-            delay(100);
+            
         }
     }
 }
