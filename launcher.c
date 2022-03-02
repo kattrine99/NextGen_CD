@@ -149,7 +149,81 @@ void mission4(){
         }
     }
 }
+void mission6()
+{
+    /*Misson Description
 
+    A car will move continuosly forward while 
+    does not detect a obstacle within a distance of 30 cm.
+    After detection, car attempts to stop DC motors. As far 
+    as obstacle will be removed a car continue to move forward.
+    */
+
+    //Initialize variables
+
+    int timesToLaunch = 1;
+    int distance = 0;
+    int numberOfObjects = 4;
+
+    //Setup Actuators and Sensors
+
+    initPinMode();
+    initUltrasonic();
+    initDCMotorPWM();
+    initIR();
+
+    int leftIR = 0;
+    int rightIR = 0;
+
+    int counter = 0;
+    int smoothleft = 2300;
+    while(timesToLaunch){
+
+        distance = getDistance();
+        delay(100);
+        printf("distance %dcm\n", distance);
+        readIR(&leftIR, &rightIR);
+        controlIR(leftIR,rightIR);
+
+        
+        
+        if(distance < 30){
+            //Stop car
+            stopDCMotor();
+            wGoRightPWM(RIGHT_90/2); //turn right on 45 degree
+            goForwardPWM();
+            delay(600);
+
+            wGoLeftPWM(LEFT_90/2); // turn left on 45 degree, normalization
+
+            if(leftIR == 1) { // means that we got an object from left side
+                wGoForwardPwm();
+
+            }
+            else{ // means that we didn't get an object
+
+                wSmoothLeft(2100);
+                stopDCMotorPWM();
+                stopDCMotor();
+            }
+
+            wSmoothLeft(2100);
+            
+            
+            counter = counter + 1;
+                
+            stopDCMotorPWM();
+            
+            
+
+        } else{
+            //Continue to move
+            initDCMotorPWM();
+            goForwardPWM();
+            
+        }
+    }
+}
 
 
 
