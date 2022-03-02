@@ -25,6 +25,8 @@ void wSmoothRight(int time);
 void wSmoothLeft(int time);
 void wGoRight(int time);
 void wGoLeft(int time);
+void wGoRightPWM(int time);
+void wGoLeftPWM(int time);
 
 
 

@@ -185,10 +185,10 @@ void wGoLeft(int time){
 
 void goRightPWM()
 {
-		digitalWrite(IN1_PIN, MAX_SPEED);
-		digitalWrite(IN2_PIN, MIN_SPEED);
-		digitalWrite(IN3_PIN, MIN_SPEED);
-		digitalWrite(IN4_PIN, MAX_SPEED);		
+		softPwmWrite(IN1_PIN, MAX_SPEED);
+		softPwmWrite(IN2_PIN, MIN_SPEED);
+		softPwmWrite(IN3_PIN, MIN_SPEED);
+		softPwmWrite(IN4_PIN, MAX_SPEED);		
 		printf("RightPWM\n");
 }
 
@@ -199,10 +199,10 @@ void wGoRightPWM(int time){
 
 void goLeftPWM()
 {
-		digitalWrite(IN1_PIN, MIN_SPEED);
-		digitalWrite(IN2_PIN, MAX_SPEED);
-		digitalWrite(IN3_PIN, MAX_SPEED);
-		digitalWrite(IN4_PIN, MIN_SPEED);		
+		softPwmWrite(IN1_PIN, MIN_SPEED);
+		softPwmWrite(IN2_PIN, MAX_SPEED);
+		softPwmWrite(IN3_PIN, MAX_SPEED);
+		softPwmWrite(IN4_PIN, MIN_SPEED);		
 		printf("LeftPWM\n");
 }
 
