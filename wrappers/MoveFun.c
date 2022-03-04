@@ -210,3 +210,11 @@ void wGoLeftPWM(int time){
 	goLeftPWM();
 	delay(time);
 }
+
+
+void wFullStop(int n){
+	stopDCMotorPWM();
+    stopDCMotor();
+    delay(n);
+
+}

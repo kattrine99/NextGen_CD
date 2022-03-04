@@ -18,6 +18,7 @@ void mission3();
 void mission4();
 void mission6();
 void mission7();
+void mission9();
 
 int main(void){
 
@@ -32,9 +33,10 @@ int main(void){
     //mission3(); //forever meassure obstacles using IR sensers
     //mission5(); hw1
     //mission4();
-    mission7();
-    
+    mission7();    
     //stopDCMotor();
+    
+    //mission9(); // chp
 
 
     return 0;
@@ -257,50 +259,70 @@ void mission7(){
 
     int counter = 0;
     
-    int right_time = 900
+    float coof = 1.3;
+    
+    int right_time = (int)(580*coof);
+    int left_time = (int)(590*coof);
+    
     
     
     while(timesToLaunch){
         
         distance = getDistance();
-        delay(100);
+        delay(50);
         printf("distance %dcm\n", distance);
         readIR(&leftIR, &rightIR);
         controlIR(leftIR,rightIR);
         
         
-        if (leftIR == 1 && rightIR == 0 && counter >= 2){
-            delay(3000);
+        if (leftIR == 1 & rightIR == 0 & (counter == 2 | counter == 4 | counter == 6)){
+            if (counter == 2){
+            coof += 0.08;}
             
             
-            wGoLeftPWM(LEFT_90);
-            
+            if (counter == 6){
+            coof += 0.01;
             }
+            
+            
+            right_time = (int)(580*coof);
+            left_time = (int)(590*coof);
+            delay(2400);
+            wFullStop(1000);
+            wGoLeftPWM(left_time);
+            counter ++;
+            wFullStop(1000);
+            
+        }
         
-        if (counter == 5){
-            delay(1000);
+        if (counter == 8){
+            wGoForwardPwm(500);
+            wGoRightPWM(right_time);
             wGoForwardPwm(3000);
+            
+            
+            break;
             }
     
     
         if(distance < 20){
             
-            stopDCMotorPWM();
-            stopDCMotor();
+            wFullStop(1000);
             wGoRightPWM(right_time);
             counter++;
+            wFullStop(1000);
+        
+            
+            
+            
             if (counter == 1){
                 wGoForwardPwm(1700);
             } else {
                 wGoForwardPwm(1000);
             }
-            
-            wGoLeftPWM(right_time * 0.65);
-            counter++;
-            if (counter == 2){
-                right_time += right_time/2
-                }
-            
+            wFullStop(1000);
+            wGoLeftPWM(left_time);
+            wFullStop(1000);
             
             
         } else{
@@ -310,6 +332,62 @@ void mission7(){
         }
     }
 }
+
+void mission9(){
+    
+    initPinMode();
+    initUltrasonic();
+    initDCMotorPWM();
+    initIR();
+    
+    
+    int left_90=720;
+    int right_90 = 720;
+    int distance =0;
+    
+    //wGoLeftPWM(left_90);
+    //wGoRightPWM(right_90);
+    
+    
+    stopDCMotorPWM();
+    stopDCMotor();
+    
+    while(1){
+        
+        distance = getDistance();
+        delay(100);
+        printf("distance %dcm\n", distance);
+        
+        if(distance < 40){
+            
+            wGoRightPWM(right_90);
+            delay(100);
+            wGoForwardPwm(1000);
+            delay(100);
+            wGoLeftPWM(left_90);
+            delay(100);
+            wGoForwardPwm(2000);
+            delay(100);
+            wGoRightPWM(right_90);
+            delay(200);
+            wGoForwardPwm(1000);
+            delay(100);
+            
+            stopDCMotorPWM();
+            stopDCMotor();
+            break;
+            
+            }
+        else{
+            wGoForwardPwm(500);
+            }
+        
+        }
+    
+    
+    
+    
+    }
 
 
 
