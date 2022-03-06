@@ -185,6 +185,7 @@ void midterm(){
     int cForward = 500;
     int cLeft = 300;
     int cRight = 300;
+    int cStop = 500;
 
 
     //Setup Actuators and Sensors
@@ -214,19 +215,20 @@ void midterm(){
                 // We met a first object, car should stay until object will be removed
                 printf("Inside firstObject\n");
                 stillSeeObject = 1; 
-                fullStop();
+                wFullStop(cStop);
             }
 
             if(objectsPassed == secondObject){
                 // we met a second object, car should avoid it
                 printf("Inside secondObject\n");
-                fullStop();
+                avoidObstacle(cLeft, cRight, cForward);
+                wFullStop(cStop);
             }
 
             if(objectsPassed == thirdObject){
                 // we met a third object, car should stop and terminate the process
                 printf("Inside fthirdObject\n");
-                fullStop();
+                wFullStop(cStop);
                 break;
             }
 
@@ -247,17 +249,19 @@ void midterm(){
             else if(leftLineTracer == 1 && rightLineTracer == 0){
                 printf("leftLineTracer = %d, rightLineTracer = %d : Moving Right", leftLineTracer, rightLineTracer);
                 // car lost a yellow line on right side, required to move right
+                wSmoothRight(cRight);
 
             }
             else if(leftLineTracer == 0 && rightLineTracer == 1){
                 printf("leftLineTracer = %d, rightLineTracer = %d : Moving Left", leftLineTracer, rightLineTracer);
                 // car lost a yellow line on left side, required to move left
+                wSmoothLeft(cLeft);
 
             }
             else if(leftLineTracer == 0 && rightLineTracer == 0){
                 printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
                 // car lost yellow lines on both sides, required to stop
-                fullStop();
+                wFullStop(cStop);
             }
 
         }
@@ -268,6 +272,11 @@ void midterm(){
 
 
 void avoidObstacle(int coefLeft, int coefRight, int coefForward){
-    wGoRight(coefRight);
-    wGoLeft(coefLeft);
+    wGoRightPWM(coefRight);
+    wGoForwardPwm(coefForward);
+    wGoLeftPWM(coefLeft);
+    wGoForwardPwm(coefForward);
+    wGoLeftPWM(coefLeft);
+    wGoForwardPwm(coefForward);
+    wGoRightPWM(coefRight);
 }
