@@ -15,6 +15,10 @@
 void mission1();
 void mission2();
 void mission3();
+void mission4();
+void checkLineTracers();
+void midterm();
+void avoidObstacle(int coefLeft, int coefRight);
 
 int main(void){
 
@@ -27,10 +31,10 @@ int main(void){
     //mission1(); // move forward for 1 sec
     //mission2(); //forever meassure distance using ultrasonic sensor
     //mission3(); //forever meassure obstacles using IR sensers
-    //mission5(); hw1
-    mission4();
-    
-    //stopDCMotor();
+    //mission4();
+
+    checkLineTracers();
+    //midterm();
 
 
     return 0;
@@ -150,6 +154,120 @@ void mission4(){
     }
 }
 
+void checkLineTracers(){
+    int leftLineTracer =0;
+    int rightLineTracer = 0;
+
+    readLineTracers(&leftLineTracer, &rightLineTracer);
+    lineTracerDetect(leftLineTracer,rightLineTracer);
+}
+
+void midterm(){
+
+    //Initialize variables
+    int timesToLaunch = 1;
+    int distance = 0;
+    int leftLineTracer = 0;
+    int rightLineTracer = 0;
+
+
+    // object Flags
+
+    int firstObject = 1;
+    int secondObject = 2;
+    int thirdObject = 3;
+
+    int objectsPassed= 0;
+    int stillSeeObject = 0;
+
+    // Movement coefficients
+
+    int cForward = 500;
+    int cLeft = 300;
+    int cRight = 300;
+
+
+    //Setup Actuators and Sensors
+    initPinMode(); // Motor driver
+    initUltrasonic(); // Ultrasonic
+    initDCMotorPWM(); // Motor
+    initLineTacer(); // LineTracers
+
+    while(timesToLaunch){
+
+        distance = getDistance();
+        delay(100);
+        printf("distance %dcm\n", distance);
+        readLineTracers(&leftLineTracer, &rightLineTracer);
+
+
+        if(distance < 15){
+            // We got an object
+            printf("See object on distance %dcm, taking maneuvers\n", distance);
+
+            //Here we should check if some object was removed or not
+            if(stillSeeObject != 1){
+                objectsPassed++;
+            }
+
+            if(objectsPassed == firstObject){
+                // We met a first object, car should stay until object will be removed
+                printf("Inside firstObject\n");
+                stillSeeObject = 1; 
+                fullStop();
+            }
+
+            if(objectsPassed == secondObject){
+                // we met a second object, car should avoid it
+                printf("Inside secondObject\n");
+                fullStop();
+            }
+
+            if(objectsPassed == thirdObject){
+                // we met a third object, car should stop and terminate the process
+                printf("Inside fthirdObject\n");
+                fullStop();
+                break;
+            }
 
 
 
+        }
+
+        else{
+            // We didnt meet any object, continue to move
+            stillSeeObject = 0;
+
+            if(leftLineTracer == 1 && rightLineTracer == 1){
+                // means no white/yellow line in front of the car
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Forward in 0.5s", leftLineTracer, rightLineTracer);
+                initDCMotorPWM();
+                wGoForwardPwm(cForward);
+            }
+            else if(leftLineTracer == 1 && rightLineTracer == 0){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Right", leftLineTracer, rightLineTracer);
+                // car lost a yellow line on right side, required to move right
+
+            }
+            else if(leftLineTracer == 0 && rightLineTracer == 1){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Left", leftLineTracer, rightLineTracer);
+                // car lost a yellow line on left side, required to move left
+
+            }
+            else if(leftLineTracer == 0 && rightLineTracer == 0){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
+                // car lost yellow lines on both sides, required to stop
+                fullStop();
+            }
+
+        }
+
+    }
+
+}
+
+
+void avoidObstacle(int coefLeft, int coefRight, int coefForward){
+    wGoRight(coefRight);
+    wGoLeft(coefLeft);
+}

@@ -11,11 +11,8 @@ void initLineTacer(){
 	pinMode(RIGHT_TRACER_PIN, INPUT);		
 }
 
-void lineTracerDetect(){
+void lineTracerDetect(int leftTracer, int rightTracer){
 	
-	
- int leftTracer = digitalRead(LEFT_TRACER_PIN);
-  int rightTracer = digitalRead(RIGHT_TRACER_PIN);
 	
 	
 	if (leftTracer == 0 && rightTracer == 1) {
@@ -47,3 +44,8 @@ void lineTracerDetect(){
         }
 	
 	}
+
+void readLineTracers(int* left, int* right){
+	*left= digitalRead(LEFT_TRACER_PIN);
+	*right = digitalRead(RIGHT_TRACER_PIN);
+}

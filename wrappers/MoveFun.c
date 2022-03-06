@@ -182,3 +182,9 @@ void wGoLeft(int time){
 	goLeft();
 	delay(time);
 }
+
+
+void fullStop(){
+	stopDCMotor();
+	stopDCMotorPWM();
+}
