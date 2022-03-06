@@ -17,8 +17,7 @@ void initDCMotorPWM();
 void goForwardPWM();
 void goBackwardPWM();
 void stopDCMotorPWM();
-void fullStop();
-
+void wFullStop(int n);
 //wrappers
 void wGoForwardPwm(int time);
 void wGoBackwardPwm(int time);
@@ -26,6 +25,8 @@ void wSmoothRight(int time);
 void wSmoothLeft(int time);
 void wGoRight(int time);
 void wGoLeft(int time);
+void wGoRightPWM(int time);
+void wGoLeftPWM(int time);
 
 
 

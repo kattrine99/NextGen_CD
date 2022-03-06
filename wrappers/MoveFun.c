@@ -183,8 +183,38 @@ void wGoLeft(int time){
 	delay(time);
 }
 
+void goRightPWM()
+{
+		softPwmWrite(IN1_PIN, MAX_SPEED);
+		softPwmWrite(IN2_PIN, MIN_SPEED);
+		softPwmWrite(IN3_PIN, MIN_SPEED);
+		softPwmWrite(IN4_PIN, MAX_SPEED);		
+		printf("RightPWM\n");
+}
 
-void fullStop(){
-	stopDCMotor();
+void wGoRightPWM(int time){
+	goRightPWM();
+	delay(time);
+}
+
+void goLeftPWM()
+{
+		softPwmWrite(IN1_PIN, MIN_SPEED);
+		softPwmWrite(IN2_PIN, MAX_SPEED);
+		softPwmWrite(IN3_PIN, MAX_SPEED);
+		softPwmWrite(IN4_PIN, MIN_SPEED);		
+		printf("LeftPWM\n");
+}
+
+void wGoLeftPWM(int time){
+	goLeftPWM();
+	delay(time);
+}
+
+
+void wFullStop(int n){
 	stopDCMotorPWM();
+    stopDCMotor();
+    delay(n);
+
 }
