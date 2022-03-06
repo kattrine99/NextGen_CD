@@ -6,9 +6,9 @@
 #include "wrappers/IRSenFun.h"
 #include "wrappers/LineTracersFun.h"
 
-#define LEFT_90 800
+#define LEFT_90 1300
 
-#define RIGHT_90 900
+#define RIGHT_90 1152
 #define _60_CM 1300
 
 
@@ -16,9 +16,9 @@ void mission1();
 void mission2();
 void mission3();
 void mission4();
-void mission6();
-void mission7();
-void mission9();
+void checkLineTracers();
+void midterm();
+void avoidObstacle(int coefLeft, int coefRight);
 
 int main(void){
 
@@ -31,12 +31,10 @@ int main(void){
     //mission1(); // move forward for 1 sec
     //mission2(); //forever meassure distance using ultrasonic sensor
     //mission3(); //forever meassure obstacles using IR sensers
-    //mission5(); hw1
     //mission4();
-    mission7();    
-    //stopDCMotor();
-    
-    //mission9(); // chp
+
+    checkLineTracers();
+    //midterm();
 
 
     return 0;
@@ -52,14 +50,9 @@ void mission1(){
         //Movement
         initPinMode();
         initDCMotorPWM();
-        wGoLeftPWM(100);
-        delay(700);
-        wGoForwardPwm(100);
-        delay(1000);
+        wSmoothLeft(LEFT_90);
         
-        
-        
-
+        wSmoothRight(RIGHT_90);
         
         stopDCMotorPWM();
         stopDCMotor();
@@ -161,234 +154,120 @@ void mission4(){
     }
 }
 
+void checkLineTracers(){
+    int leftLineTracer =0;
+    int rightLineTracer = 0;
 
-void mission6()
-{
-    /*Misson Description
+    readLineTracers(&leftLineTracer, &rightLineTracer);
+    lineTracerDetect(leftLineTracer,rightLineTracer);
+}
 
-    A car will move continuosly forward while 
-    does not detect a obstacle within a distance of 30 cm.
-    After detection, car attempts to stop DC motors. As far 
-    as obstacle will be removed a car continue to move forward.
-    */
+void midterm(){
 
     //Initialize variables
-
     int timesToLaunch = 1;
     int distance = 0;
-    int numberOfObjects = 4;
+    int leftLineTracer = 0;
+    int rightLineTracer = 0;
+
+
+    // object Flags
+
+    int firstObject = 1;
+    int secondObject = 2;
+    int thirdObject = 3;
+
+    int objectsPassed= 0;
+    int stillSeeObject = 0;
+
+    // Movement coefficients
+
+    int cForward = 500;
+    int cLeft = 300;
+    int cRight = 300;
+
 
     //Setup Actuators and Sensors
+    initPinMode(); // Motor driver
+    initUltrasonic(); // Ultrasonic
+    initDCMotorPWM(); // Motor
+    initLineTacer(); // LineTracers
 
-    initPinMode();
-    initUltrasonic();
-    initDCMotorPWM();
-    initIR();
-
-    int leftIR = 0;
-    int rightIR = 0;
-
-    int counter = 0;
-    int smoothleft = 2300;
     while(timesToLaunch){
 
         distance = getDistance();
         delay(100);
         printf("distance %dcm\n", distance);
-        readIR(&leftIR, &rightIR);
-        controlIR(leftIR,rightIR);
+        readLineTracers(&leftLineTracer, &rightLineTracer);
 
-        
-        
-        if(distance < 30){
-            //Stop car
-            stopDCMotor();
-            wGoRightPWM(RIGHT_90/2); //turn right on 45 degree
-            goForwardPWM();
-            delay(600);
 
-            wGoLeftPWM(LEFT_90/2); // turn left on 45 degree, normalization
+        if(distance < 15){
+            // We got an object
+            printf("See object on distance %dcm, taking maneuvers\n", distance);
 
-            if(leftIR == 1) { // means that we got an object from left side
-                wGoForwardPwm(100);
-
-            }
-            else{ // means that we didn't get an object
-
-                wSmoothLeft(2100);
-                stopDCMotorPWM();
-                stopDCMotor();
+            //Here we should check if some object was removed or not
+            if(stillSeeObject != 1){
+                objectsPassed++;
             }
 
-            wSmoothLeft(2100);
-            
-            
-            counter = counter + 1;
-                
-            stopDCMotorPWM();
-            
-            
+            if(objectsPassed == firstObject){
+                // We met a first object, car should stay until object will be removed
+                printf("Inside firstObject\n");
+                stillSeeObject = 1; 
+                fullStop();
+            }
 
-        } else{
-            //Continue to move
-            initDCMotorPWM();
-            goForwardPWM();
-            
+            if(objectsPassed == secondObject){
+                // we met a second object, car should avoid it
+                printf("Inside secondObject\n");
+                fullStop();
+            }
+
+            if(objectsPassed == thirdObject){
+                // we met a third object, car should stop and terminate the process
+                printf("Inside fthirdObject\n");
+                fullStop();
+                break;
+            }
+
+
+
         }
-    }
-}
 
-
-
-void mission7(){
-    
-    int timesToLaunch = 1;
-    int distance = 0;
-    int numberOfObjects = 4;
-
-    //Setup Actuators and Sensors
-    
-    initPinMode();
-    initUltrasonic();
-    initDCMotorPWM();
-    initIR();
-
-    int leftIR = 0;
-    int rightIR = 0;
-    int stateIR = 0;
-
-    int counter = 0;
-    
-    float coof = 1.3;
-    
-    int right_time = (int)(580*coof);
-    int left_time = (int)(590*coof);
-    
-    
-    
-    while(timesToLaunch){
-        
-        distance = getDistance();
-        delay(50);
-        printf("distance %dcm\n", distance);
-        readIR(&leftIR, &rightIR);
-        controlIR(leftIR,rightIR);
-        
-        
-        if (leftIR == 1 & rightIR == 0 & (counter == 2 | counter == 4 | counter == 6)){
-            if (counter == 2){
-            coof += 0.08;}
-            
-            
-            if (counter == 6){
-            coof += 0.01;
-            }
-            
-            
-            right_time = (int)(580*coof);
-            left_time = (int)(590*coof);
-            delay(2400);
-            wFullStop(1000);
-            wGoLeftPWM(left_time);
-            counter ++;
-            wFullStop(1000);
-            
-        }
-        
-        if (counter == 8){
-            wGoForwardPwm(500);
-            wGoRightPWM(right_time);
-            wGoForwardPwm(3000);
-            
-            
-            break;
-            }
-    
-    
-        if(distance < 20){
-            
-            wFullStop(1000);
-            wGoRightPWM(right_time);
-            counter++;
-            wFullStop(1000);
-        
-            
-            
-            
-            if (counter == 1){
-                wGoForwardPwm(1700);
-            } else {
-                wGoForwardPwm(1000);
-            }
-            wFullStop(1000);
-            wGoLeftPWM(left_time);
-            wFullStop(1000);
-            
-            
-        } else{
-        //Continue to move
-        initDCMotorPWM();
-        goForwardPWM();
-        }
-    }
-}
-
-void mission9(){
-    
-    initPinMode();
-    initUltrasonic();
-    initDCMotorPWM();
-    initIR();
-    
-    
-    int left_90=720;
-    int right_90 = 720;
-    int distance =0;
-    
-    //wGoLeftPWM(left_90);
-    //wGoRightPWM(right_90);
-    
-    
-    stopDCMotorPWM();
-    stopDCMotor();
-    
-    while(1){
-        
-        distance = getDistance();
-        delay(100);
-        printf("distance %dcm\n", distance);
-        
-        if(distance < 40){
-            
-            wGoRightPWM(right_90);
-            delay(100);
-            wGoForwardPwm(1000);
-            delay(100);
-            wGoLeftPWM(left_90);
-            delay(100);
-            wGoForwardPwm(2000);
-            delay(100);
-            wGoRightPWM(right_90);
-            delay(200);
-            wGoForwardPwm(1000);
-            delay(100);
-            
-            stopDCMotorPWM();
-            stopDCMotor();
-            break;
-            
-            }
         else{
-            wGoForwardPwm(500);
+            // We didnt meet any object, continue to move
+            stillSeeObject = 0;
+
+            if(leftLineTracer == 1 && rightLineTracer == 1){
+                // means no white/yellow line in front of the car
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Forward in 0.5s", leftLineTracer, rightLineTracer);
+                initDCMotorPWM();
+                wGoForwardPwm(cForward);
             }
-        
+            else if(leftLineTracer == 1 && rightLineTracer == 0){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Right", leftLineTracer, rightLineTracer);
+                // car lost a yellow line on right side, required to move right
+
+            }
+            else if(leftLineTracer == 0 && rightLineTracer == 1){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Left", leftLineTracer, rightLineTracer);
+                // car lost a yellow line on left side, required to move left
+
+            }
+            else if(leftLineTracer == 0 && rightLineTracer == 0){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
+                // car lost yellow lines on both sides, required to stop
+                fullStop();
+            }
+
         }
-    
-    
-    
-    
+
     }
 
+}
 
 
-
+void avoidObstacle(int coefLeft, int coefRight, int coefForward){
+    wGoRight(coefRight);
+    wGoLeft(coefLeft);
+}

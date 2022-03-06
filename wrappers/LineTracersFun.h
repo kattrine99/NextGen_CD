@@ -2,7 +2,8 @@
 #define LINETRACERSFUN_H
 
 void initLineTacer();
-void lineTracerDetect();
+void lineTracerDetect(int leftTracer, int rightTracer);
+void readLineTracers(int* left, int* right);
 
 
 #endif 
