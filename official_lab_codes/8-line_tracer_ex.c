@@ -6,7 +6,10 @@
 #define RIGHT_TRACER_PIN 11
 
 
-void initLineTacer();
+void initLineTacer(){
+	pinMode(LEFT_TRACER_PIN, INPUT);
+	pinMode(RIGHT_TRACER_PIN, INPUT);		
+}
 
 int main(void){
     
