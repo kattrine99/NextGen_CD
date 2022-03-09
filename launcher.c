@@ -6,19 +6,10 @@
 #include "wrappers/IRSenFun.h"
 #include "wrappers/LineTracersFun.h"
 
-#define LEFT_90 1300
-
-#define RIGHT_90 1152
-#define _60_CM 1300
 
 #define LEFT_TRACER_PIN 10
 #define RIGHT_TRACER_PIN 11
 
-
-void mission1();
-void mission2();
-void mission3();
-void mission4();
 void checkLineTracers();
 void midterm();
 void avoidObstacle(int coefLeft, int coefRight, int coefForward);
@@ -31,10 +22,6 @@ int main(void){
     }
 
     //Test Area
-    //mission1(); // move forward for 1 sec
-    //mission2(); //forever meassure distance using ultrasonic sensor
-    //mission3(); //forever meassure obstacles using IR sensers
-    //mission4();
 
     checkLineTracers();
     //midterm();
@@ -44,118 +31,7 @@ int main(void){
 }
 
 
-void mission1(){
 
-    int timesToLaunch = 1;
-
-    while(timesToLaunch > 0){
-
-        //Movement
-        initPinMode();
-        initDCMotorPWM();
-        wSmoothLeft(LEFT_90);
-        
-        wSmoothRight(RIGHT_90);
-        
-        stopDCMotorPWM();
-        stopDCMotor();
-        break;
-    }
-}
-
-void mission2(){
-
-    int timesToLaunch = 1;
-
-    while(timesToLaunch>0){
-
-        //UltraSonic
-        initUltrasonic();
-        getDistance();
-        printf("distance %dcm\n", getDistance());
-        delay(100);
-    }
-
-}
-
-void mission3(){
-    int timesToLaunch = 1;
-
-    while(timesToLaunch>0){
-
-        //IR sensors
-        int LValue, RValue; 
-        initIR();
-        readIR(&LValue,&RValue);
-        controlIR(LValue,RValue);
-    }
-}
-
-void mission4(){
-
-    /*Misson Description
-
-    A car will move continuosly forward while 
-    does not detect a obstacle within a distance of 30 cm.
-    After detection, car attempts to stop DC motors. As far 
-    as obstacle will be removed a car continue to move forward.
-    */
-
-    //Initialize variables
-
-    int timesToLaunch = 1;
-    int distance = 0;
-
-    //Setup Actuators and Sensors
-
-    initPinMode();
-    initUltrasonic();
-    initDCMotorPWM();
-    int counter = 0;
-    int smoothleft = 2300;
-    while(timesToLaunch){
-
-        distance = getDistance();
-        delay(100);
-        printf("distance %dcm\n", distance);
-        
-        if(counter == 2 | counter == 4 | counter == 6){
-                counter ++;
-                goForwardPWM();
-                delay(_60_CM);
-                
-                wSmoothLeft(smoothleft);
-                smoothleft  = smoothleft + 150 ;
-                }
-        
-        
-        if(distance < 30){
-            //Stop car
-            stopDCMotor();
-            
-            
-            wSmoothRight(1300);
-            goForwardPWM();
-            delay(600);
-            stopDCMotorPWM();
-            stopDCMotor();
-            wSmoothLeft(2100);
-            
-            
-            counter = counter + 1;
-                
-            stopDCMotorPWM();
-            
-            
-
-        } else{
-            //Continue to move
-            initDCMotorPWM();
-            goForwardPWM();
-            
-        }
-    }
-}
 
 void checkLineTracers(){
     initLineTacer();
@@ -201,8 +77,8 @@ void midterm(){
     //Initialize variables
     int timesToLaunch = 1;
     int distance = 0;
-    int leftLineTracer = 0;
-    int rightLineTracer = 0;
+    int leftLineTracer;
+    int rightLineTracer;
 
 
     // object Flags
@@ -221,6 +97,9 @@ void midterm(){
     int cRight = 300;
     int cStop = 500;
 
+    int dinamicCoefRight= (int)cRight * 1.00;
+    int dinamicCoefLeft = (int)cLeft * 1.00;
+
 
     //Setup Actuators and Sensors
     initPinMode(); // Motor driver
@@ -233,7 +112,10 @@ void midterm(){
         distance = getDistance();
         delay(100);
         printf("distance %dcm\n", distance);
-        readLineTracers(&leftLineTracer, &rightLineTracer);
+
+        leftLineTracer = digitalRead(LEFT_TRACER_PIN);
+        rightLineTracer = digitalRead(RIGHT_TRACER_PIN);
+        
 
 
         if(distance < 15){
@@ -279,27 +161,29 @@ void midterm(){
 
             if(leftLineTracer == 1 && rightLineTracer == 1){
                 // means no white/yellow line in front of the car
-                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Forward in 0.5s", leftLineTracer, rightLineTracer);
-                initDCMotorPWM();
-                wGoForwardPwm(cForward);
+                printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
+                wFullStop(cStop);
+                
             }
             else if(leftLineTracer == 1 && rightLineTracer == 0){
                 printf("leftLineTracer = %d, rightLineTracer = %d : Moving Right", leftLineTracer, rightLineTracer);
                 // car lost a yellow line on right side, required to move right
-                wSmoothRight(cRight);
+                wGoRightPWM(dinamicCoefRight);
 
             }
             else if(leftLineTracer == 0 && rightLineTracer == 1){
                 printf("leftLineTracer = %d, rightLineTracer = %d : Moving Left", leftLineTracer, rightLineTracer);
                 // car lost a yellow line on left side, required to move left
-                wSmoothLeft(cLeft);
+                wGoLeftPWM(dinamicCoefLeft);
 
             }
             else if(leftLineTracer == 0 && rightLineTracer == 0){
-                printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
-                // car lost yellow lines on both sides, required to stop
+                // car lost yellow lines on both sides, required to move forward
+                printf("leftLineTracer = %d, rightLineTracer = %d : Forward", leftLineTracer, rightLineTracer);
+                initDCMotorPWM();
+                wGoForwardPwm(cForward);
 
-                wFullStop(cStop);
+                
 
             }
 
