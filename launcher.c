@@ -22,7 +22,7 @@ int main(void){
     }
 
     //Test Area
-
+    wGoForwardPwm(1000);
     checkLineTracers();
     //midterm();
 
@@ -38,33 +38,42 @@ void checkLineTracers(){
     
     int leftTracer;
     int rightTracer;
+    initUltrasonic(); // Ultrasonic
+    
   
     while (1) {
+        
 		 
 	leftTracer = digitalRead(LEFT_TRACER_PIN);
 	rightTracer = digitalRead(RIGHT_TRACER_PIN);
    
-         if (leftTracer == 0 && rightTracer == 1) {
+         if (leftTracer == 0 & rightTracer == 1) {
              printf("Left\n");  
-             wFullStop(1000);    
-            
+                 wGoRightPWM(10);
+                
+             
+             
 
-         }else if (rightTracer ==0 && leftTracer == 1) {
+         }else if (rightTracer ==0 & leftTracer == 1) {
                printf("Right\n");   
-               wFullStop(1000);
+               wGoLeftPWM(10);
+               
+               
             
                   
-         }else if (rightTracer == 0 && leftTracer == 0) {
+         }else if (rightTracer == 0 & leftTracer == 0) {
                printf("Both\n"); 
-               initDCMotorPWM();
-                wGoForwardPwm(1000);
-                 
+               
+                 wFullStop(100);
                   
                     
                                
-         }else if (rightTracer == 1 && leftTracer == 1) {
+         }else if (rightTracer == 1 & leftTracer == 1) {
               printf("No\n");   
-              wFullStop(1000); 
+               
+              
+              initDCMotorPWM();
+                wGoForwardPwm(10);
             
          }     
 	 }
@@ -93,8 +102,8 @@ void midterm(){
     // Movement coefficients
 
     int cForward = 500;
-    int cLeft = 300;
-    int cRight = 300;
+    int cLeft = 150;
+    int cRight = 150;
     int cStop = 500;
 
     int dinamicCoefRight= (int)cRight * 1.00;
@@ -116,9 +125,42 @@ void midterm(){
         leftLineTracer = digitalRead(LEFT_TRACER_PIN);
         rightLineTracer = digitalRead(RIGHT_TRACER_PIN);
         
+        
+        
+        stillSeeObject = 0;
 
+            if(leftLineTracer == 1 && rightLineTracer == 1){
+                // means no white/yellow line in front of the car
+                printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
+            
+                
+                
+            }
+            else if(leftLineTracer == 1 && rightLineTracer == 0){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Right", leftLineTracer, rightLineTracer);
+                // car lost a yellow line on right side, required to move right
+                wGoRightPWM(dinamicCoefRight);
 
-        if(distance < 15){
+            }
+            else if(leftLineTracer == 0 && rightLineTracer == 1){
+                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Left", leftLineTracer, rightLineTracer);
+                // car lost a yellow line on left side, required to move left
+                wGoLeftPWM(dinamicCoefLeft);
+
+            }
+            else if(leftLineTracer == 0 && rightLineTracer == 0){
+                // car lost yellow lines on both sides, required to move forward
+                printf("leftLineTracer = %d, rightLineTracer = %d : Forward", leftLineTracer, rightLineTracer);
+                initDCMotorPWM();
+                wGoForwardPwm(cForward);
+                
+              
+
+                
+
+            }
+
+        /*if(distance < 20){
             // We got an object
             printf("See object on distance %dcm, taking maneuvers\n", distance);
 
@@ -149,49 +191,21 @@ void midterm(){
 
                 wFullStop(cStop);
                 break;
-            }
+            }*/
 
 
 
         }
 
-        else{
+        
             // We didnt meet any object, continue to move
-            stillSeeObject = 0;
+            
 
-            if(leftLineTracer == 1 && rightLineTracer == 1){
-                // means no white/yellow line in front of the car
-                printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
-                wFullStop(cStop);
-                
-            }
-            else if(leftLineTracer == 1 && rightLineTracer == 0){
-                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Right", leftLineTracer, rightLineTracer);
-                // car lost a yellow line on right side, required to move right
-                wGoRightPWM(dinamicCoefRight);
-
-            }
-            else if(leftLineTracer == 0 && rightLineTracer == 1){
-                printf("leftLineTracer = %d, rightLineTracer = %d : Moving Left", leftLineTracer, rightLineTracer);
-                // car lost a yellow line on left side, required to move left
-                wGoLeftPWM(dinamicCoefLeft);
-
-            }
-            else if(leftLineTracer == 0 && rightLineTracer == 0){
-                // car lost yellow lines on both sides, required to move forward
-                printf("leftLineTracer = %d, rightLineTracer = %d : Forward", leftLineTracer, rightLineTracer);
-                initDCMotorPWM();
-                wGoForwardPwm(cForward);
-
-                
-
-            }
-
-        }
+        
 
     }
 
-}
+
 
 
 void avoidObstacle(int coefLeft, int coefRight, int coefForward){

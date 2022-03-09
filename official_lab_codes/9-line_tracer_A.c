@@ -40,29 +40,24 @@ int main(void) {
 
         if (leftTracer == 0 && rightTracer == 1) {
             printf("Left\n");
-			goRight();
-			delay(500);
+			
 
 
         }
         else if (rightTracer == 0 && leftTracer == 1) {
             printf("Right\n");
-			goLeft();
-			delay(500);
+			
 
 
         }
         else if (rightTracer == 0 && leftTracer == 0) {
             printf("Both\n");
-			stopDCMotor();
-			delay(1000);
-			break;
+			
 
         }
         else if (rightTracer == 1 && leftTracer == 1) {
             printf("No\n");
-			goForward();
-			delay(500);
+			
 
         }
     }
