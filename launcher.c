@@ -11,6 +11,9 @@
 #define RIGHT_90 1152
 #define _60_CM 1300
 
+#define LEFT_TRACER_PIN 10
+#define RIGHT_TRACER_PIN 11
+
 
 void mission1();
 void mission2();
@@ -18,7 +21,7 @@ void mission3();
 void mission4();
 void checkLineTracers();
 void midterm();
-void avoidObstacle(int coefLeft, int coefRight);
+void avoidObstacle(int coefLeft, int coefRight, int coefForward);
 
 int main(void){
 
@@ -155,11 +158,42 @@ void mission4(){
 }
 
 void checkLineTracers(){
-    int leftLineTracer =0;
-    int rightLineTracer = 0;
+    initLineTacer();
+    
+    int leftTracer;
+    int rightTracer;
+  
+    while (1) {
+		 
+	leftTracer = digitalRead(LEFT_TRACER_PIN);
+	rightTracer = digitalRead(RIGHT_TRACER_PIN);
+   
+         if (leftTracer == 0 && rightTracer == 1) {
+             printf("Left\n");  
+             wFullStop(1000);    
+            
 
-    readLineTracers(&leftLineTracer, &rightLineTracer);
-    lineTracerDetect(leftLineTracer,rightLineTracer);
+         }else if (rightTracer ==0 && leftTracer == 1) {
+               printf("Right\n");   
+               wFullStop(1000);
+            
+                  
+         }else if (rightTracer == 0 && leftTracer == 0) {
+               printf("Both\n"); 
+               initDCMotorPWM();
+                wGoForwardPwm(1000);
+                 
+                  
+                    
+                               
+         }else if (rightTracer == 1 && leftTracer == 1) {
+              printf("No\n");   
+              wFullStop(1000); 
+            
+         }     
+	 }
+
+    
 }
 
 void midterm(){
@@ -215,6 +249,7 @@ void midterm(){
                 // We met a first object, car should stay until object will be removed
                 printf("Inside firstObject\n");
                 stillSeeObject = 1; 
+
                 wFullStop(cStop);
             }
 
@@ -223,11 +258,13 @@ void midterm(){
                 printf("Inside secondObject\n");
                 avoidObstacle(cLeft, cRight, cForward);
                 wFullStop(cStop);
+
             }
 
             if(objectsPassed == thirdObject){
                 // we met a third object, car should stop and terminate the process
                 printf("Inside fthirdObject\n");
+
                 wFullStop(cStop);
                 break;
             }
@@ -261,7 +298,9 @@ void midterm(){
             else if(leftLineTracer == 0 && rightLineTracer == 0){
                 printf("leftLineTracer = %d, rightLineTracer = %d : Stop", leftLineTracer, rightLineTracer);
                 // car lost yellow lines on both sides, required to stop
+
                 wFullStop(cStop);
+
             }
 
         }
