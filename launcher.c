@@ -11,6 +11,7 @@
 #define RIGHT_TRACER_PIN 11
 
 void checkLineTracers();
+void mission2();
 void midterm();
 void avoidObstacle(int coefLeft, int coefRight, int coefForward);
 
@@ -23,44 +24,89 @@ int main(void){
     }
 
     //Test Area
+    initDCMotorPWM();
     wGoForwardPwm(1000);
+    
     checkLineTracers();
     //midterm();
+    //mission2();
 
 
     return 0;
 }
 
 
+void mission2(){
+
+    int timesToLaunch = 1;
+
+    while(timesToLaunch>0){
+
+        //UltraSonic
+        initUltrasonic();
+        getDistance();
+        printf("distance %dcm\n", getDistance());
+        delay(100);
+    }
+
+}
+
 
 
 void checkLineTracers(){
     initLineTacer();
-    initUltrasonic(); // Ultrasonic
-
-    int numOb = 0;
-    int distance;
     
+
+   
+    int distance;
     
     int leftTracer;
     int rightTracer;
-    initUltrasonic(); // Ultrasonic
     
-  
+    initPinMode();
+    initUltrasonic();
+    initDCMotorPWM();
+    int counter = 0;
     while (1) {
-        
-		 
+    
+    distance = getDistance();
+    
+    printf("distance %dcm\n", distance);
 	leftTracer = digitalRead(LEFT_TRACER_PIN);
 	rightTracer = digitalRead(RIGHT_TRACER_PIN);
-
-    distance = getDistance();
-    delay(10);
-    printf("distance %dcm\n", distance);
-
-        if(distance < 15){
-            numOb = numOb + 1 ;
-            printf("Detected an object! # of objects in total: %d\n", numOb);
+    
+    if (distance < 15){
+        counter++;
+        if (counter == 1){
+            while(1){
+                
+                stopDCMotor();
+                stopDCMotorPWM();
+                if(!(getDistance() < 25)){
+                    break;
+                }
+            }
+                
+        initDCMotorPWM();
+        } 
+        
+        if (counter == 2){
+        
+            wGoRightPWM(800);
+            wGoForwardPwm(600);
+            wGoLeftPWM(800);
+            wGoForwardPwm(1800);
+            wGoLeftPWM(800);
+            wGoForwardPwm(600);
+            wGoRightPWM(800);
+            
         }
+        
+        if(counter == 3){
+            wFullStop(200);
+            } 
+    }
+
    
          if (leftTracer == 0 & rightTracer == 1) {
              printf("Left\n");  
@@ -76,7 +122,7 @@ void checkLineTracers(){
                
             
                   
-         }else if (rightTracer == 0 & leftTracer == 0) {
+         }else if (rightTracer == 0 & leftTracer == 0  & counter > 2 ) {
                printf("Both\n"); 
                
                  wFullStop(100);
@@ -90,10 +136,10 @@ void checkLineTracers(){
               initDCMotorPWM();
                 wGoForwardPwm(10);
             
-         }     
+         }  
+         
+        
 	 }
-
-    
 }
 
 void midterm(){
