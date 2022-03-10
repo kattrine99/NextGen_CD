@@ -14,6 +14,7 @@ void checkLineTracers();
 void midterm();
 void avoidObstacle(int coefLeft, int coefRight, int coefForward);
 
+
 int main(void){
 
     //Validation
@@ -35,6 +36,11 @@ int main(void){
 
 void checkLineTracers(){
     initLineTacer();
+    initUltrasonic(); // Ultrasonic
+
+    int numOb = 0;
+    int distance;
+    
     
     int leftTracer;
     int rightTracer;
@@ -46,6 +52,15 @@ void checkLineTracers(){
 		 
 	leftTracer = digitalRead(LEFT_TRACER_PIN);
 	rightTracer = digitalRead(RIGHT_TRACER_PIN);
+
+    distance = getDistance();
+    delay(10);
+    printf("distance %dcm\n", distance);
+
+        if(distance < 15){
+            numOb = numOb + 1 ;
+            printf("Detected an object! # of objects in total: %d\n", numOb);
+        }
    
          if (leftTracer == 0 & rightTracer == 1) {
              printf("Left\n");  
@@ -217,3 +232,4 @@ void avoidObstacle(int coefLeft, int coefRight, int coefForward){
     wGoForwardPwm(coefForward);
     wGoRightPWM(coefRight);
 }
+
