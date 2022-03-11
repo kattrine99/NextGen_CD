@@ -9,11 +9,35 @@
 
 #define LEFT_TRACER_PIN 10
 #define RIGHT_TRACER_PIN 11
+#define LEFT_IR_PIN 27
+#define RIGHT_IR_PIN 26
 
 void checkLineTracers();
 void mission2();
 void midterm();
 void avoidObstacle(int coefLeft, int coefRight, int coefForward);
+
+void checkIR(){
+    initIR();
+    int left;
+    int right;
+    while(1){
+        
+         left= digitalRead(LEFT_IR_PIN);
+            right = digitalRead(RIGHT_IR_PIN);
+            
+            printf("left %d, right %d\n",left,right);
+            
+            if(left == 1 && right == 1){
+                initDCMotorPWM();
+                wGoForwardPwm(10);
+                }
+                else if(left == 0 && right==1){
+                    wGoLeftPWM(10);
+                    }
+        }
+    
+    }
 
 
 int main(void){
@@ -24,8 +48,9 @@ int main(void){
     }
 
     //Test Area
-    initDCMotorPWM();
-    wGoForwardPwm(1000);
+    //initDCMotorPWM();
+    //wGoForwardPwm(1000);
+    //checkIR();
     
     checkLineTracers();
     //midterm();
@@ -55,6 +80,11 @@ void mission2(){
 
 void checkLineTracers(){
     initLineTacer();
+    initIR();
+    int right;
+    int left;
+    
+    
     
 
    
@@ -68,6 +98,9 @@ void checkLineTracers(){
     initDCMotorPWM();
     int counter = 0;
     while (1) {
+        
+        left= digitalRead(LEFT_IR_PIN);
+	right = digitalRead(RIGHT_IR_PIN);
     
     distance = getDistance();
     
@@ -77,40 +110,114 @@ void checkLineTracers(){
     
     if (distance < 15){
         counter++;
-        if (counter == 1){
+        if (counter == 1 | counter == 4){
             while(1){
                 
                 stopDCMotor();
                 stopDCMotorPWM();
-                if(!(getDistance() < 25)){
+                if(getDistance() > 25){
                     break;
                 }
             }
                 
         initDCMotorPWM();
+        goForward();
         } 
         
         if (counter == 2){
-        
-            wGoRightPWM(800);
-            wGoForwardPwm(600);
-            wGoLeftPWM(800);
-            wGoForwardPwm(1800);
-            wGoLeftPWM(800);
-            wGoForwardPwm(600);
-            wGoRightPWM(800);
             
+            int turns =0;
+            
+            wGoRightPWM(400);
+            while(1){
+                
+                
+                rightTracer = digitalRead(RIGHT_TRACER_PIN);
+                
+                
+                left= digitalRead(LEFT_IR_PIN);
+                right = digitalRead(RIGHT_IR_PIN);
+            
+            printf("left %d, right %d\n",left,right);
+            
+                    if(turns == 80){
+                        wFullStop(500);
+                        initDCMotorPWM();
+                        wGoRightPWM(1100);
+                        goto next;
+                        }
+                
+                if (rightTracer ==0 & leftTracer == 1) {
+               printf("Right\n");
+               wGoForwardPwm(10);   
+               wGoLeftPWM(10);
+               
+               
+                    }
+                    
+                else if(left == 0 && right == 1){
+                        wGoLeftPWM(20);
+                        wGoForwardPwm(20);
+                        turns++;
+                    }
+                
+                else{
+                    initDCMotorPWM();
+                wGoForwardPwm(10);
+                    }
+                }
+                
+                while(1){
+        
+            left= digitalRead(LEFT_IR_PIN);
+            right = digitalRead(RIGHT_IR_PIN);
+            
+            printf("left %d, right %d\n",left,right);
+            
+            if((left == 1 && right == 1) || (left == 0 && right == 0) || (left == 1 && right == 0)){
+                initDCMotorPWM();
+                wGoForwardPwm(10);
+                }
+                else if(left == 0 && right==1){
+                    wGoLeftPWM(10);
+                    break;
+                    }
+        }
+                    
+        
+        /*
+            wGoRightPWM(1400);
+            wGoForwardPwm(600);
+            //wGoLeftPWM(800);
+           // wGoForwardPwm(1800);
+           // wGoLeftPWM(800);
+           // wGoForwardPwm(600);
+           // wGoRightPWM(800);
+           * */
         }
         
-        if(counter == 3){
+        if (counter == 3){
+            
+                wFullStop(1000);
+                wGoLeftPWM(1400);
+                wGoForwardPwm(1000);
+            
+            
+            }
+        
+        
+        
+       /* if(counter == 3){
             wFullStop(200);
-            } 
+            } */ 
     }
 
+next:
    
          if (leftTracer == 0 & rightTracer == 1) {
              printf("Left\n");  
                  wGoRightPWM(10);
+                 
                 
              
              
@@ -120,9 +227,10 @@ void checkLineTracers(){
                wGoLeftPWM(10);
                
                
+               
             
                   
-         }else if (rightTracer == 0 & leftTracer == 0  & counter > 2 ) {
+         }else if (rightTracer == 0 & leftTracer == 0  & (counter > 2 & counter !=4) ) {
                printf("Both\n"); 
                
                  wFullStop(100);
