@@ -10,6 +10,10 @@
 #define LEFT_TRACER_PIN 10
 #define RIGHT_TRACER_PIN 11
 
+#define LEFT_IR_PIN 27
+#define RIGHT_IR_PIN 26
+
+
 void checkLineTracers();
 void mission2();
 void midterm();
@@ -54,6 +58,7 @@ void mission2(){
 
 
 void checkLineTracers(){
+    initIR();
     initLineTacer();
     
 
@@ -62,12 +67,19 @@ void checkLineTracers(){
     
     int leftTracer;
     int rightTracer;
+
+    int leftIR;
+    int rightIR;
     
     initPinMode();
     initUltrasonic();
     initDCMotorPWM();
     int counter = 0;
     while (1) {
+
+
+    leftIR= digitalRead(LEFT_IR_PIN);
+    rightIR = digitalRead(RIGHT_IR_PIN);
     
     distance = getDistance();
     
@@ -77,7 +89,7 @@ void checkLineTracers(){
     
     if (distance < 15){
         counter++;
-        if (counter == 1){
+        if (counter == 2){
             while(1){
                 
                 stopDCMotor();
@@ -90,8 +102,36 @@ void checkLineTracers(){
         initDCMotorPWM();
         } 
         
-        if (counter == 2){
+        if (counter == 1){
+            wGoRightPWM(800);
+            while(1){
+                if(rightTracer == 1){
+                    wGoRightPWM(10);
+                    break;
+
+                }
+                else{
+                    initDCMotorPWM();
+                    wGoForwardPwm(10);
+                }
+            }
+
+            while(1){
+                leftIR= digitalRead(LEFT_IR_PIN);
+
+                if(leftIR == 0){
+                    wGoLeftPWM(800);
+                    break;
+
+                }
+                else{
+                    initDCMotorPWM();
+                    wGoForwardPwm(10);
+                }
+            }
+            }
         
+        /*
             wGoRightPWM(800);
             wGoForwardPwm(600);
             wGoLeftPWM(800);
@@ -99,6 +139,7 @@ void checkLineTracers(){
             wGoLeftPWM(800);
             wGoForwardPwm(600);
             wGoRightPWM(800);
+            */
             
         }
         
