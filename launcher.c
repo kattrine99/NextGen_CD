@@ -80,6 +80,10 @@ void mission2(){
 
 void checkLineTracers(){
     initLineTacer();
+    
+    float coof = 1;
+    
+    
     initIR();
     int right;
     int left;
@@ -96,10 +100,12 @@ void checkLineTracers(){
     initPinMode();
     initUltrasonic();
     initDCMotorPWM();
+    wGoForwardPwm(300);
+    goForwardPWM();
     int counter = 0;
     while (1) {
         
-        left= digitalRead(LEFT_IR_PIN);
+    left= digitalRead(LEFT_IR_PIN);
 	right = digitalRead(RIGHT_IR_PIN);
     
     distance = getDistance();
@@ -108,27 +114,32 @@ void checkLineTracers(){
 	leftTracer = digitalRead(LEFT_TRACER_PIN);
 	rightTracer = digitalRead(RIGHT_TRACER_PIN);
     
+    
     if (distance < 15){
+
         counter++;
         if (counter == 1 | counter == 4){
             while(1){
                 
+                distance = getDistance();
+                printf("fullstop");
                 stopDCMotor();
                 stopDCMotorPWM();
-                if(getDistance() > 25){
-                    break;
+                delay(100);
+                if(distance > 25){
+                break;
                 }
             }
                 
         initDCMotorPWM();
-        goForward();
+        goForwardPWM();
         } 
         
         if (counter == 2){
             
-            int turns =0;
+            int turns = 0;
             
-            wGoRightPWM(400);
+            wGoRightPWM((int)(400*coof));
             while(1){
                 
                 
@@ -140,10 +151,10 @@ void checkLineTracers(){
             
             printf("left %d, right %d\n",left,right);
             
-                    if(turns == 80){
+                    if(turns == 55){
                         wFullStop(500);
                         initDCMotorPWM();
-                        wGoRightPWM(1100);
+                        wGoRightPWM((int)(650*coof));
                         goto next;
                         }
                 
@@ -156,14 +167,14 @@ void checkLineTracers(){
                     }
                     
                 else if(left == 0 && right == 1){
-                        wGoLeftPWM(20);
-                        wGoForwardPwm(20);
+                        wGoLeftPWM((int)(20*coof));
+                        wGoForwardPwm((int)(20*coof));
                         turns++;
                     }
                 
                 else{
                     initDCMotorPWM();
-                wGoForwardPwm(10);
+                wGoForwardPwm((int)(10*coof));
                     }
                 }
                 
@@ -197,16 +208,18 @@ void checkLineTracers(){
         }
         
         if (counter == 3){
-            
-                wFullStop(1000);
-                wGoLeftPWM(1400);
-                wGoForwardPwm(1000);
-            
+              wGoForwardPwm((int)(200*coof));
+                wFullStop((int)(1000*coof));
+                wGoLeftPWM((int)(750*coof));
+                wGoForwardPwm((int)(1600*coof));
+                stopDCMotor();
+                stopDCMotorPWM();
+            break;
             
             }
         
-        
-        
+    
+
        /* if(counter == 3){
             wFullStop(200);
             } */ 
