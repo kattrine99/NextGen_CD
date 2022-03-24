@@ -3,7 +3,7 @@ import wrappers.MoveFun as move
 def test():
 	move.goForward(2)
 	move.goBackward(2)
-	move.goLeft(2)
+	move.goLeft(0.5)
 	move.goRight(2)
 	move.goSmoothLeft(2)
 	move.goSmoothRight(2)
@@ -13,4 +13,3 @@ def test():
 
 ## Write your code below ## 
 move.help()
-test()
