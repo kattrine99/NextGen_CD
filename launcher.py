@@ -11,4 +11,5 @@ import cv2
 #camera.videoToBinary(capture)
 #capture.release()
 
-camera.playBinaryVideo("cat.avi")
+#camera.playBinaryVideo("cat.avi")
+#camera.StreamAndRecordVideo()
