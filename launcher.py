@@ -1,15 +1,14 @@
-import wrappers.MoveFun as move
+#import wrappers.MoveFun as move
+import wrappers.CameraFun as camera
+import cv2
 
-def test():
-	move.goForward(2)
-	move.goBackward(2)
-	move.goLeft(0.5)
-	move.goRight(2)
-	move.goSmoothLeft(2)
-	move.goSmoothRight(2)
-	move.goSmoothBackRight(2)
-	move.goSmoothBackLeft(2)
 
 
 ## Write your code below ## 
-move.help()
+
+#camera.greeting()
+#capture = cv2.VideoCapture("cat.avi")
+#camera.videoToBinary(capture)
+#capture.release()
+
+camera.playBinaryVideo("cat.avi")
