@@ -19,14 +19,14 @@ def greeting():
 
 def videoToBinary(capture):
 	while True:
-	 # ret : frame capture result
-	 # frame : Captured frame
-	 ret, frame = capture.read()
-	 test = toBinaryImage(frame)
-	 cv2.imshow('frame', test)
-	 #exit 
-	 if cv2.waitKey(1) > 0:
-	 	break
+		# ret : frame capture result
+		# frame : Captured frame
+		ret, frame = capture.read()
+		test = toBinaryImage(frame)
+		cv2.imshow('frame', test)
+		#exit 
+		if cv2.waitKey(1) > 0:
+			break
 
 def playBinaryVideo(name):
 	capture = cv2.VideoCapture(name)
@@ -81,14 +81,14 @@ def StreamAndRecordVideo():
 def playVideoFromFile(name):
 	capture = cv2.VideoCapture(name)
 	while True:
-	# ret : frame capture result
-	# frame : Captured frame
-	ret, frame = capture.read()
-	# convert image to Grayscale
-	#gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-	cv2.imshow('frame', frame)
-	if cv2.waitKey(1) > 0:
-		break
+		# ret : frame capture result
+		# frame : Captured frame
+		ret, frame = capture.read()
+		# convert image to Grayscale
+		#gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+		cv2.imshow('frame', frame)
+		if cv2.waitKey(1) > 0:
+			break
 	capture.release()
 
 def rawVideoCapture():
@@ -102,14 +102,14 @@ def rawVideoCapture():
 
 	# capture frames from the camera
 	for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_port = True):
-	# grab the raw NumPy array representing the image, then initialize the timestamp
-	# and occupied/unoccupied text
-	image = frame.array
-	# show the frame
-	cv2.imshow("Frame", image)
-	key = cv2.waitKey(1) & 0xFF
-	# clear the stream in preparation for the next frame
-	rawCapture.truncate(0)
-	# if the `q` key was pressed, break from the loop
-	if key == ord ("q"):
-		break
+		# grab the raw NumPy array representing the image, then initialize the timestamp
+		# and occupied/unoccupied text
+		image = frame.array
+		# show the frame
+		cv2.imshow("Frame", image)
+		key = cv2.waitKey(1) & 0xFF
+		# clear the stream in preparation for the next frame
+		rawCapture.truncate(0)
+		# if the `q` key was pressed, break from the loop
+		if key == ord ("q"):
+			break
