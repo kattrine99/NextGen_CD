@@ -1,6 +1,6 @@
 #import wrappers.MoveFun as move
 import wrappers.CameraFun as camera
-import cv2
+
 
 
 
@@ -12,4 +12,5 @@ import cv2
 #capture.release()
 
 #camera.playBinaryVideo("cat.avi")
+camera.videoFilters("cat.avi")
 #camera.StreamAndRecordVideo()
