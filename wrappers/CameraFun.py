@@ -1,21 +1,40 @@
 import cv2
 import numpy as np
 
-from picamera.array import PiRGBArray
-from picamera import PiCamera
-import time
-
-def toBinaryImage(image):
-	lower_white = np.array([0,0,150])
-	upper_white = np.array([179,255,255])
-
-	# convert image to HSV
-	hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-	mask = cv2.inRange(hsv, lower_white, upper_white)
-	return mask
-
 def greeting():
 	print("CameraFun is avaliable.")
+
+
+## Image Filters ##
+
+def toBinaryImage(image,isGray = False):
+	lower_white = np.array([0,0,150])
+	upper_white = np.array([179,255,255])
+	mask = cv2.inRange(toHSVImage(image,isGray), lower_white, upper_white)
+	return mask
+
+def toHSVImage(image,isGray = False):
+	if(isGray):
+		temp = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+		hsv = cv2.cvtColor(temp, cv2.COLOR_BGR2HSV)
+	else:
+		hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+	return hsv
+
+def toGaussImage(image):
+	blur_img = cv2.GaussianBlur(image,(5,5),0)
+	return blur_img
+
+def toGrayImage(image):
+	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+	return gray
+
+def toEdgeImage(image):
+	edge = cv2.Canny(image,50,150)
+	return edge
+
+
+## Video Processing ##
 
 def videoToBinary(capture):
 	while True:
@@ -31,6 +50,35 @@ def videoToBinary(capture):
 def playBinaryVideo(name):
 	capture = cv2.VideoCapture(name)
 	videoToBinary(capture)
+	capture.release()
+
+def videoFilters(name):
+	# Each frame proceed through these procedures:
+	# Read image -> GrayScale -> Gaussian Blur -> Canny edge -> HSV to Binary
+	capture = cv2.VideoCapture(name)
+	while True:
+		ret, frame = capture.read()
+
+		# GrayScale
+		gray = toGrayImage(frame)
+
+		# Gaussian Blur
+		gauss = toGaussImage(gray)
+
+		#Canny edge 
+		edge = toEdgeImage(gauss)
+
+		#HSV to Binary
+		#binary = toBinaryImage(gray,True)
+		binary = toBinaryImage(frame)
+
+		cv2.imshow('frame', binary)
+		cv2.imshow('edge', edge)
+		cv2.imshow('gauss', gauss)
+
+		#exit 
+		if cv2.waitKey(1) > 0:
+			break
 	capture.release()
 
 def streamVideo():
@@ -90,26 +138,3 @@ def playVideoFromFile(name):
 		if cv2.waitKey(1) > 0:
 			break
 	capture.release()
-
-def rawVideoCapture():
-	# initialize the camera and grab a reference to the raw camera capture
-	camera = PiCamera()
-	camera.resolution = (640,480)
-	camera.framerate = 32
-	rawCapture = PiRGBArray(camera, size=(640,480))
-	# allow the camera to warmup
-	time.sleep(0.1)
-
-	# capture frames from the camera
-	for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_port = True):
-		# grab the raw NumPy array representing the image, then initialize the timestamp
-		# and occupied/unoccupied text
-		image = frame.array
-		# show the frame
-		cv2.imshow("Frame", image)
-		key = cv2.waitKey(1) & 0xFF
-		# clear the stream in preparation for the next frame
-		rawCapture.truncate(0)
-		# if the `q` key was pressed, break from the loop
-		if key == ord ("q"):
-			break
