@@ -7,18 +7,15 @@ def greeting():
 
 ## Image Filters ##
 
-def toBinaryImage(image,isGray = False):
+def toBinaryImage(image):
 	lower_white = np.array([0,0,150])
 	upper_white = np.array([179,255,255])
-	mask = cv2.inRange(toHSVImage(image,isGray), lower_white, upper_white)
+	mask = cv2.inRange(toHSVImage(image), lower_white, upper_white)
 	return mask
 
-def toHSVImage(image,isGray = False):
-	if(isGray):
-		temp = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-		hsv = cv2.cvtColor(temp, cv2.COLOR_BGR2HSV)
-	else:
-		hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+def toHSVImage(image):
+	#temp = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+	hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
 	return hsv
 
 def toGaussImage(image):
@@ -32,6 +29,16 @@ def toGrayImage(image):
 def toEdgeImage(image):
 	edge = cv2.Canny(image,50,150)
 	return edge
+
+def toBlendimage(image1,image2,alpha = 0.5):
+	beta = (1.0 - alpha)
+	result = cv2.addWeighted(image1,alpha,image2,beta,0.0)
+	return result
+
+def toErodeImage(image):
+	kernel = np.ones((7,7),np.uint8)
+	erosion = cv2.erode(image,kernel,iterations = 1)
+	return erosion
 
 
 ## Video Processing ##
@@ -59,8 +66,9 @@ def videoFilters(name):
 	while True:
 		ret, frame = capture.read()
 
+		roi = frame[240:480,0:640]
 		# GrayScale
-		gray = toGrayImage(frame)
+		gray = toGrayImage(roi)
 
 		# Gaussian Blur
 		gauss = toGaussImage(gray)
@@ -69,10 +77,9 @@ def videoFilters(name):
 		edge = toEdgeImage(gauss)
 
 		#HSV to Binary
-		#binary = toBinaryImage(gray,True)
-		binary = toBinaryImage(frame)
+		binary = toBinaryImage(roi)
 
-		cv2.imshow('frame', binary)
+		cv2.imshow('binary', binary)
 		cv2.imshow('edge', edge)
 		cv2.imshow('gauss', gauss)
 
