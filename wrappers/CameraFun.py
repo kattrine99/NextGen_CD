@@ -40,6 +40,22 @@ def toErodeImage(image):
 	erosion = cv2.erode(image,kernel,iterations = 1)
 	return erosion
 
+def getContour(source,result):
+	#Creating a contour 
+	_,contours,hierarchy = cv2.findContours(source,1,cv2.CHAIN_APPROX_NONE)
+	cv2.drawContours(result,contours,-1,[0,255,0],1)
+
+	#Experimental
+	#Try to concetrate attention of car only on line
+	if len(contours) > 0:
+		c = max(contours, key = cv2.contourArea)
+		#M = cv2.moments(c)
+		#if M['m00'] !=0:
+		#	cx = int(M['m10']/M['m00']) #contour x coordinate
+		#	cy = int(M['m01']/M['m00']) #counter y coordinate 
+		#	print("Cx: " + str(cx) + " Cy: "+ str(cy))
+			
+
 
 ## Video Processing ##
 
@@ -66,7 +82,8 @@ def videoFilters(name):
 	while True:
 		ret, frame = capture.read()
 
-		roi = frame[240:480,0:640]
+		#roi = frame[240:480,0:640]
+		roi = frame[340:480,10:630]
 		# GrayScale
 		gray = toGrayImage(roi)
 
@@ -79,9 +96,14 @@ def videoFilters(name):
 		#HSV to Binary
 		binary = toBinaryImage(roi)
 
+		#Creating a contour 
+		#_,contours,hierarchy = cv2.findContours(binary,1,cv2.CHAIN_APPROX_NONE)
+		#cv2.drawContours(roi,contours,-1,[0,255,0],1)
+		getContour(binary,roi)
+
+		cv2.imshow('origin', frame)
 		cv2.imshow('binary', binary)
 		cv2.imshow('edge', edge)
-		cv2.imshow('gauss', gauss)
 
 		#exit 
 		if cv2.waitKey(1) > 0:
