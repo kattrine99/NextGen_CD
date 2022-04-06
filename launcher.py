@@ -12,5 +12,5 @@ import wrappers.CameraFun as camera
 #capture.release()
 
 #camera.playBinaryVideo("cat.avi")
-camera.videoFilters("cat.avi")
+camera.videoFilters("output.avi")
 #camera.StreamAndRecordVideo()

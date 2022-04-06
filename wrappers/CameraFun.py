@@ -7,18 +7,15 @@ def greeting():
 
 ## Image Filters ##
 
-def toBinaryImage(image,isGray = False):
+def toBinaryImage(image):
 	lower_white = np.array([0,0,150])
 	upper_white = np.array([179,255,255])
-	mask = cv2.inRange(toHSVImage(image,isGray), lower_white, upper_white)
+	mask = cv2.inRange(toHSVImage(image), lower_white, upper_white)
 	return mask
 
-def toHSVImage(image,isGray = False):
-	if(isGray):
-		temp = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-		hsv = cv2.cvtColor(temp, cv2.COLOR_BGR2HSV)
-	else:
-		hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+def toHSVImage(image):
+	#temp = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+	hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
 	return hsv
 
 def toGaussImage(image):
@@ -32,6 +29,32 @@ def toGrayImage(image):
 def toEdgeImage(image):
 	edge = cv2.Canny(image,50,150)
 	return edge
+
+def toBlendimage(image1,image2,alpha = 0.5):
+	beta = (1.0 - alpha)
+	result = cv2.addWeighted(image1,alpha,image2,beta,0.0)
+	return result
+
+def toErodeImage(image):
+	kernel = np.ones((7,7),np.uint8)
+	erosion = cv2.erode(image,kernel,iterations = 1)
+	return erosion
+
+def getContour(source,result):
+	#Creating a contour 
+	_,contours,hierarchy = cv2.findContours(source,1,cv2.CHAIN_APPROX_NONE)
+	cv2.drawContours(result,contours,-1,[0,255,0],1)
+
+	#Experimental
+	#Try to concetrate attention of car only on line
+	if len(contours) > 0:
+		c = max(contours, key = cv2.contourArea)
+		#M = cv2.moments(c)
+		#if M['m00'] !=0:
+		#	cx = int(M['m10']/M['m00']) #contour x coordinate
+		#	cy = int(M['m01']/M['m00']) #counter y coordinate 
+		#	print("Cx: " + str(cx) + " Cy: "+ str(cy))
+			
 
 
 ## Video Processing ##
@@ -59,8 +82,10 @@ def videoFilters(name):
 	while True:
 		ret, frame = capture.read()
 
+		#roi = frame[240:480,0:640]
+		roi = frame[340:480,10:630]
 		# GrayScale
-		gray = toGrayImage(frame)
+		gray = toGrayImage(roi)
 
 		# Gaussian Blur
 		gauss = toGaussImage(gray)
@@ -69,12 +94,16 @@ def videoFilters(name):
 		edge = toEdgeImage(gauss)
 
 		#HSV to Binary
-		#binary = toBinaryImage(gray,True)
-		binary = toBinaryImage(frame)
+		binary = toBinaryImage(roi)
 
-		cv2.imshow('frame', binary)
+		#Creating a contour 
+		#_,contours,hierarchy = cv2.findContours(binary,1,cv2.CHAIN_APPROX_NONE)
+		#cv2.drawContours(roi,contours,-1,[0,255,0],1)
+		getContour(binary,roi)
+
+		cv2.imshow('origin', frame)
+		cv2.imshow('binary', binary)
 		cv2.imshow('edge', edge)
-		cv2.imshow('gauss', gauss)
 
 		#exit 
 		if cv2.waitKey(1) > 0:
