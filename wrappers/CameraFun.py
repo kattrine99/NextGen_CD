@@ -1,6 +1,9 @@
+from turtle import right
 import cv2
 import numpy as np
 import time
+
+
 
 
 def greeting():
@@ -11,10 +14,12 @@ def greeting():
 
 def steering_wheel(data):
     ratio = np.average(data[0:320, 430:480]) / max(np.average(data[320:640, 430:480]), 1)
+
     if ratio > 2:
         return "right"
     elif ratio < 0.5:
         return "left"
+
     return "forward"
                     
 
@@ -40,7 +45,7 @@ def videoFilters(name):
         cv2.imshow('origin', frame)
         cv2.imshow('Honda',preprocessing(frame))
         print(steering_wheel(preprocessing(frame)))
-        time.sleep(0.05)
+        time.sleep(0.10)
 
         #exit 
         if cv2.waitKey(1) > 0:
@@ -72,3 +77,12 @@ def StreamAndRecordVideo():
     capture.release()
     out.release()
     cv2.destroyAllWindows()
+
+def light(frame):
+    gamma = 0.75
+    lookUpTable = np.empty((1,256), np.uint8)
+    for i in range(256):
+        lookUpTable[0,i] = np.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
+    output = cv2.LUT(frame, lookUpTable)
+    return output
+
