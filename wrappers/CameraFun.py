@@ -1,169 +1,75 @@
 import cv2
 import numpy as np
+import time
+
+import matplotlib.pyplot as plt
 
 def greeting():
-	print("CameraFun is avaliable.")
+    print("CameraFun is avaliable.")
 
 
 ## Image Filters ##
 
-def toBinaryImage(image):
-	lower_white = np.array([0,0,150])
-	upper_white = np.array([179,255,255])
-	mask = cv2.inRange(toHSVImage(image), lower_white, upper_white)
-	return mask
+def steering_wheel(data):
+    ratio = np.average(data[0:320, 430:480]) / max(np.average(data[320:640, 430:480]), 1)
+    if ratio > 2:
+        return "right"
+    elif ratio < 0.5:
+        return "left"
+    return "forward"
+                    
 
-def toHSVImage(image):
-	#temp = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-	hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-	return hsv
-
-def toGaussImage(image):
-	blur_img = cv2.GaussianBlur(image,(5,5),0)
-	return blur_img
-
-def toGrayImage(image):
-	gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-	return gray
-
-def toEdgeImage(image):
-	edge = cv2.Canny(image,50,150)
-	return edge
-
-def toBlendimage(image1,image2,alpha = 0.5):
-	beta = (1.0 - alpha)
-	result = cv2.addWeighted(image1,alpha,image2,beta,0.0)
-	return result
-
-def toErodeImage(image):
-	kernel = np.ones((7,7),np.uint8)
-	erosion = cv2.erode(image,kernel,iterations = 1)
-	return erosion
-
-def getContour(source,result):
-	#Creating a contour 
-	_,contours,hierarchy = cv2.findContours(source,1,cv2.CHAIN_APPROX_NONE)
-	cv2.drawContours(result,contours,-1,[0,255,0],1)
-
-	#Experimental
-	#Try to concetrate attention of car only on line
-	if len(contours) > 0:
-		c = max(contours, key = cv2.contourArea)
-		#M = cv2.moments(c)
-		#if M['m00'] !=0:
-		#	cx = int(M['m10']/M['m00']) #contour x coordinate
-		#	cy = int(M['m01']/M['m00']) #counter y coordinate 
-		#	print("Cx: " + str(cx) + " Cy: "+ str(cy))
-			
-
+def preprocessing(frame):
+    hsv_img = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # cv2.imshow("hsv without range", hsv_img)
+    hsv_img = cv2.inRange(hsv_img, (0, 30, 120), (67, 255, 227))
+    # r = cv2.selectROI(hsv_img)
+    # x, y, h, w = 0, 600, 100, 800
+    # mask = cv2.inRange()
+    # crop = edge_img[y:y + h, x:x + w]  
+    
+    return hsv_img
 
 ## Video Processing ##
 
-def videoToBinary(capture):
-	while True:
-		# ret : frame capture result
-		# frame : Captured frame
-		ret, frame = capture.read()
-		test = toBinaryImage(frame)
-		cv2.imshow('frame', test)
-		#exit 
-		if cv2.waitKey(1) > 0:
-			break
-
-def playBinaryVideo(name):
-	capture = cv2.VideoCapture(name)
-	videoToBinary(capture)
-	capture.release()
-
 def videoFilters(name):
-	# Each frame proceed through these procedures:
-	# Read image -> GrayScale -> Gaussian Blur -> Canny edge -> HSV to Binary
-	capture = cv2.VideoCapture(name)
-	while True:
-		ret, frame = capture.read()
+    capture = cv2.VideoCapture(name)
 
-		#roi = frame[240:480,0:640]
-		roi = frame[340:480,10:630]
-		# GrayScale
-		gray = toGrayImage(roi)
+    while True:
+        ret, frame = capture.read()
 
-		# Gaussian Blur
-		gauss = toGaussImage(gray)
+        cv2.imshow('origin', frame)
+        cv2.imshow('Honda',preprocessing(frame))
+        print(steering_wheel(preprocessing(frame)))
+        time.sleep(0.05)
 
-		#Canny edge 
-		edge = toEdgeImage(gauss)
-
-		#HSV to Binary
-		binary = toBinaryImage(roi)
-
-		#Creating a contour 
-		#_,contours,hierarchy = cv2.findContours(binary,1,cv2.CHAIN_APPROX_NONE)
-		#cv2.drawContours(roi,contours,-1,[0,255,0],1)
-		getContour(binary,roi)
-
-		cv2.imshow('origin', frame)
-		cv2.imshow('binary', binary)
-		cv2.imshow('edge', edge)
-
-		#exit 
-		if cv2.waitKey(1) > 0:
-			break
-	capture.release()
-
-def streamVideo():
-	capture = cv2.VideoCapture(0)
-	capture.set(3,320) # horizontal pixels
-	capture.set(4,240) # vertical pixels
-
-	while True:
-		# ret: frame captureresult
-		# frame: captured frame
-		ret,frame = capture.read()
-
-		if(ret):
-			#if capture result was successfull
-			gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-
-			cv2.imshow('frame',gray)
-			if cv2.waitKey(1) > 0:
-				break
-	capture.release()
+        #exit 
+        if cv2.waitKey(1) > 0:
+            break
+    capture.release()
 
 def StreamAndRecordVideo():
-	capture = cv2.VideoCapture(0)
+    capture = cv2.VideoCapture(0)
 
-	#Define the codec and create VideoWriter object
-	fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-	out = cv2.VideoWriter('output.avi', fourcc, 20.0,(640,480))
+    #Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+    out = cv2.VideoWriter('output.avi', fourcc, 30.0,(640,480))
 
-	while capture.isOpened():
-		ret,frame = capture.read()
-		if not ret:
-			print("Can't receive frame (stream end?). Exiting...")
-			break
-		#frame = cv2.flip(frame,0)
+    while capture.isOpened():
+        ret,frame = capture.read()
+        if not ret:
+            print("Can't receive frame (stream end?). Exiting...")
+            break
+        #frame = cv2.flip(frame,0)
 
-		#Write the flipped frame
-		out.write(frame)
+        #Write the flipped frame
+        out.write(frame)
 
-		cv2.imshow('frame', frame)
-		if cv2.waitKey(1) == ord('q'):
-			break
+        cv2.imshow('frame', frame)
+        if cv2.waitKey(1) == ord('q'):
+            break
 
-	# Release everything if job is finished
-	capture.release()
-	out.release()
-	cv2.destroyAllWindows()
-
-def playVideoFromFile(name):
-	capture = cv2.VideoCapture(name)
-	while True:
-		# ret : frame capture result
-		# frame : Captured frame
-		ret, frame = capture.read()
-		# convert image to Grayscale
-		#gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-		cv2.imshow('frame', frame)
-		if cv2.waitKey(1) > 0:
-			break
-	capture.release()
+    # Release everything if job is finished
+    capture.release()
+    out.release()
+    cv2.destroyAllWindows()
