@@ -133,3 +133,16 @@ def processImage(image):
     image_with_lines = draw_the_lines(image, lines)
 
     return image_with_lines
+
+
+#if ratio > 2:
+         #command = "right"
+    #elif ratio < 0.5:
+        #command = "left"
+
+    #else:
+        #command = "forward"
+
+    #print("The ratio is" + str(round(ratio,2)))
+    #with open('ratio.txt', 'a') as the_file:
+        #the_file.write(str(round(ratio,2))+" "+command +' \n')
