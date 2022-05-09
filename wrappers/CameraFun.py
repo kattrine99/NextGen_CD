@@ -13,11 +13,11 @@ def greeting():
 ## Image Filters ##
 
 def steering_wheel(data):
-    ratio = np.average(data[0:320, 430:480]) / max(np.average(data[320:640, 430:480]), 1)
+    ratio = np.average(data[0:320, 430:470]) / max(np.average(data[320:640, 430:470]), 1)
 
-    if ratio > 2:
+    if ratio > 4:
         return "right"
-    elif ratio < 0.5:
+    elif ratio < 0.25:
         return "left"
 
     return "forward"
@@ -26,11 +26,13 @@ def steering_wheel(data):
 def preprocessing(frame):
     hsv_img = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     # cv2.imshow("hsv without range", hsv_img)
-    hsv_img = cv2.inRange(hsv_img, (0, 30, 120), (67, 255, 227))
+    hsv_img = cv2.inRange(hsv_img, (20, 30, 120), (67, 180, 227))
     # r = cv2.selectROI(hsv_img)
     # x, y, h, w = 0, 600, 100, 800
     # mask = cv2.inRange()
-    # crop = edge_img[y:y + h, x:x + w]  
+    # crop = edge_img[y:y + h, x:x + w]
+    #kernel = np.ones((7,7),np.uint8)
+    #hsv_img = cv2.erode(hsv_img,kernel,iterations = 1)
     
     return hsv_img
 
