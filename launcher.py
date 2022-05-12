@@ -1,23 +1,11 @@
-import wrappers.MoveFun as move
-import wrappers.UltraSonic as sonic
+#import wrappers.MoveFun as move
+#import wrappers.UltraSonic as sonic
 
 import cv2
 import numpy as np
 import time
 
-
-
-
-def test():
-    #move.goForward(3)
-    #move.goSmoothRight(0.2 , 1, 0.001)
-    #move.goSmoothLeft(0.4, 0.0005, 1)
-    time.sleep(0.5)
-    #move.goSmoothRight(0.3 , 1, 0.001)
-
-def preprocess(frame):
-    roi = frame[360:frame.shape[0],0:frame.shape[1]]
-
+def preprocess(roi):
     hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
     lower_white = np.array([0,37,80])
     upper_white = np.array([59,255,255])
@@ -50,7 +38,7 @@ def average_slope_intercept(lines):
  
     left_fitavg=np.average(left_fit, axis=0)
     right_fitavg=np.average(right_fit, axis=0)
-    print("left slope",left_fitavg,"rigt slope",right_fitavg)
+    #print("left slope",left_fitavg,"rigt slope",right_fitavg)
 
     return len(left_fit), len(right_fit)
 
@@ -64,54 +52,82 @@ def display_lines(lines,image):
     return line_image
 
 def processVideo():
-    capture = cv2.VideoCapture("video/new_map 30 fps light on.avi")
+    capture = cv2.VideoCapture("new_map 30 fps light on.avi")
     command = "None"
     prev_command = "None" # previous command
+    frame_number = 0
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    
 
     while True:
         ret, frame = capture.read()
+        cv2.putText(frame,str(frame_number),(10,30), font, 1,(0,0,255),2,cv2.LINE_AA)
+
+        if(frame_number % 8 == 0):
+            roi = frame[400:frame.shape[0],0:frame.shape[1]-10]
+
+            edge,treshold = preprocess(roi)
+
+            merged = cv2.bitwise_and(edge,treshold,mask = None)
+            #mergedTwise = cv2.bitwise_or(merged,edge,mask = None)
+
+            group_image = cv2.hconcat([edge, treshold,merged])
+            cv2.imshow('group',group_image)
+            #cv2.imshow('merged twise',mergedTwise)
         
-
-        edge,treshold = preprocess(frame)
-
-        merged = cv2.bitwise_and(edge,treshold,mask = None)
+            lines=cv2.HoughLinesP(merged,1,np.pi/180,30,np.array([]),minLineLength=20,maxLineGap=5)
+            num_left_lines,num_right_lines = average_slope_intercept(lines)
+            print("                  ")
+            print("Frame #: "+ str(frame_number))
+            print("# of left: "+str(num_left_lines)+ " # of right: "+ str(num_right_lines))
+            frame_with_lines = display_lines(lines,roi)
     
-        lines=cv2.HoughLinesP(merged,1,np.pi/180,30,np.array([]),minLineLength=20,maxLineGap=5)
-        num_left_lines,num_right_lines = average_slope_intercept(lines)
-        print("# of left: "+str(num_left_lines)+ " # of right: "+ str(num_right_lines))
-        frame_with_lines = display_lines(lines,frame[360:frame.shape[0],0:frame.shape[1]])
- 
-        if(num_left_lines != 0 and num_right_lines != 0):
-            if((num_right_lines / num_left_lines) <2 or (num_left_lines / num_right_lines) < 2):
-                command = "Forward"
-        elif(num_left_lines > num_right_lines):
-            command = "Left"
-        elif(num_right_lines> num_left_lines):
-            command = "Right"
+            if(num_left_lines != 0 and num_right_lines != 0):
+                if( num_right_lines < 2 * num_left_lines and (num_left_lines/num_right_lines) < 2):
+                    command = "Forward"
+                    prev_command = command
+                elif( num_left_lines < 2 * num_right_lines and (num_right_lines/num_left_lines) < 2):
+                    command = "Forward"
+                    prev_command = command
+                elif(num_left_lines > num_right_lines):
+                    command = "Left"
+                    prev_command = command
+                elif(num_right_lines> num_left_lines):
+                    command = "Right"
+                    prev_command = command
+            else:
+                if(num_left_lines > num_right_lines):
+                    command = "Left"
+                    prev_command = command
+                elif(num_right_lines> num_left_lines):
+                    command = "Right"
+                    prev_command = command
+                elif(num_left_lines == 0 and num_right_lines):
+                    command = "Forward "
+
+            
+
+            if(command == "Forward"):
+                ## move forward
+                print("Decision: Forward")
+                #move.goForward(0.05)
+            elif(command == "Right"):
+                ## move right
+                print("Decision: Right")
+                #move.goSmoothRight(0.05)
+            elif(command == "Left"):
+                ## move Left
+                print("Decision: Left")
+                #move.goSmoothLeft(0.05)
+
     
-        prev_command = command
 
-        if(num_left_lines == 0 and num_right_lines == 0):
-            command = prev_command
-
-        
-
-        if(command == "Forward"):
-            ## move forward
-            print("Forward")
-            #move.goForward(0.05)
-        elif(command == "Right"):
-            ## move right
-            print("Right")
-            #move.goSmoothRight(0.05)
-        elif(command == "Left"):
-            ## move Left
-            print("Left")
-            #move.goSmoothLeft(0.05)
-
+            
+        cv2.putText(frame,"Cur Cmd: "+command,(10,60), font, 0.5,(0,0,255),2,cv2.LINE_AA)
         cv2.imshow('Origin',frame)
         cv2.imshow('Lines',frame_with_lines)
-        time.sleep(0.10)
+        frame_number = frame_number +1
+        time.sleep(0.05)
         #exit
         if cv2.waitKey(1) > 0:
             break
@@ -121,49 +137,70 @@ def processVideoOFF():
     capture = cv2.VideoCapture(0)
     command = "None"
     prev_command = "None" # previous command
+    frame_number = 0
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    
 
     while True:
         ret, frame = capture.read()
+        cv2.putText(frame,str(frame_number),(10,30), font, 1,(0,0,255),2,cv2.LINE_AA)
 
-        edge,treshold = preprocess(frame)
+        if(frame_number % 8 == 0):
+            roi = frame[400:frame.shape[0],0:frame.shape[1]-10]
 
-        merged = cv2.bitwise_and(edge,treshold,mask = None)
+            edge,treshold = preprocess(roi)
+
+            merged = cv2.bitwise_and(edge,treshold,mask = None)
+        
+            lines=cv2.HoughLinesP(merged,1,np.pi/180,30,np.array([]),minLineLength=20,maxLineGap=5)
+            num_left_lines,num_right_lines = average_slope_intercept(lines)
+            print("                  ")
+            print("Frame #: "+ str(frame_number))
+            print("# of left: "+str(num_left_lines)+ " # of right: "+ str(num_right_lines))
+            #frame_with_lines = display_lines(lines,roi)
     
-        lines=cv2.HoughLinesP(merged,1,np.pi/180,30,np.array([]),minLineLength=20,maxLineGap=5)
-        num_left_lines,num_right_lines = average_slope_intercept(lines)
+            if(num_left_lines != 0 and num_right_lines != 0):
+                if( num_right_lines < 2 * num_left_lines and (num_left_lines/num_right_lines) < 2):
+                    command = "Forward"
+                    prev_command = command
+                elif( num_left_lines < 2 * num_right_lines and (num_right_lines/num_left_lines) < 2):
+                    command = "Forward"
+                    prev_command = command
+                elif(num_left_lines > num_right_lines):
+                    command = "Left"
+                    prev_command = command
+                elif(num_right_lines> num_left_lines):
+                    command = "Right"
+                    prev_command = command
+            else:
+                if(num_left_lines > num_right_lines):
+                    command = "Left"
+                    prev_command = command
+                elif(num_right_lines> num_left_lines):
+                    command = "Right"
+                    prev_command = command
+                elif(num_left_lines == 0 and num_right_lines):
+                    command = "Forward "
 
-        #print("# of left: "+str(num_left_lines)+ " # of right: "+ str(num_right_lines))
+            
 
-        #frame_with_lines = display_lines(lines,frame[360:frame.shape[0],0:frame.shape[1]])
- 
-        if(num_left_lines != 0 and num_right_lines != 0):
-            if((num_right_lines / num_left_lines) <2 or (num_left_lines / num_right_lines) < 2):
-                command = "Forward"
-        elif(num_left_lines > num_right_lines):
-            command = "Left"
-        elif(num_right_lines> num_left_lines):
-            command = "Right"
-    
-        prev_command = command
+            if(command == "Forward"):
+                ## move forward
+                print("Decision: Forward")
+                #move.goForward(0.05)
+            elif(command == "Right"):
+                ## move right
+                print("Decision: Right")
+                #move.goSmoothRight(0.05)
+            elif(command == "Left"):
+                ## move Left
+                print("Decision: Left")
+                #move.goSmoothLeft(0.05)
 
-        if(num_left_lines == 0 and num_right_lines == 0):
-            command = prev_command
-
-        if(command == "Forward"):
-            ## move forward
-            print("Forward")
-            move.goForward(0.2)
-        elif(command == "Right"):
-            ## move right
-            print("Right")
-            move.goSmoothRight(0.2 , 1, 0.001)
-        elif(command == "Left"):
-            ## move Left
-            print("Left")
-            move.goSmoothLeft(0.2, 0.0005, 1)
-
+            
         #cv2.imshow('Origin',frame)
         #cv2.imshow('Lines',frame_with_lines)
+        frame_number = frame_number +1
         time.sleep(0.10)
         #exit
         if cv2.waitKey(1) > 0:
@@ -185,7 +222,7 @@ def processVideoOFF():
        
         """
 
-#processVideo()
+processVideo()
 
-processVideoOFF()
+#processVideoOFF()
 
