@@ -33,11 +33,11 @@ def getDistance():
   return distance
 
 def checkDistance():
-	dist = getDistance()
-	command = "none"
-	if(dist > 20.0):
-		command = "forward"
-	elif(dist < 20.0):
-		command = "stop"
-	return command
-		
+    dist = getDistance()
+    command = "none"
+    if(dist > 20.0):
+        command = "forward"
+    elif(dist < 20.0):
+        command = "stop"
+    return command
+

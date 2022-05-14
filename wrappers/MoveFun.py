@@ -2,7 +2,6 @@ import RPi.GPIO as GPIO
 from gpiozero import Motor
 import time
 from time import sleep
-
 GPIO.setmode(GPIO.BCM)
 left = Motor(18, 23) # left pair of Motors
 right = Motor(24, 25) # right pair of Motors
@@ -22,32 +21,29 @@ def help():
     print("9. goSmoothBackRight(duration: int,leftCoef: float , rightCoef: float) - turns car backward right smoothly. Note! rightCoef/leftCoef is in range 0 and 1\n")
     print("10. stopDCMotor() - stop car.\n")
 
-def goForward(duration, speed = 0.5):
+def goForward(speed = 0.25):
     
-    print("Moving forward for "+ str(duration)+" s " +"with speed = "+ str(speed))
     left.forward(speed)
+    right.forward(speed)
+
+def goBackward(duration):
+    print("Moving backward for "+ str(duration)+" s " +"with speed = "+str(speed))
+    left.backward()
+    right.backward()
+    time.sleep(duration)
+    stopDCMotor()
+
+def goLeft(duration, speed = 0.47):
+    print("Moving left for "+ str(duration)+" s")
+    left.backward(speed)
     right.forward(speed)
     time.sleep(duration)
     stopDCMotor()
 
-def goBackward(duration, speed = 0.5):
-    print("Moving backward for "+ str(duration)+" s " +"with speed = "+str(speed))
-    left.backward(speed)
-    right.backward(speed)
-    time.sleep(duration)
-    stopDCMotor()
-
-def goLeft(duration):
-    print("Moving left for "+ str(duration)+" s")
-    left.backward()
-    right.forward()
-    time.sleep(duration)
-    stopDCMotor()
-
-def goRight(duration):
+def goRight(duration, speed =0.47):
     print("Moving right for "+ str(duration)+" s")
-    left.forward()
-    right.backward()
+    left.forward(speed)
+    right.backward(speed)
     time.sleep(duration)
     stopDCMotor()
 
@@ -65,14 +61,14 @@ def goSmoothRight(duration, leftCoef = 0.5 , rightCoef = 0.1):
     time.sleep(duration)
     stopDCMotor()
 
-def goSmoothBackLeft(duration, leftCoef = 0.1 , rightCoef = 0.5):
+def goSmoothBackLeft(duration, leftCoef = 0 , rightCoef = 0.4):
     print("Moving smooth back left for "+ str(duration)+" s, "+"leftCoef = "+ str(leftCoef) + ", rightCoef = " + str(rightCoef))
     left.backward(leftCoef)
     right.backward(rightCoef)
     time.sleep(duration)
     stopDCMotor()
 
-def goSmoothBackRight(duration, leftCoef = 0.5 , rightCoef = 0.1):
+def goSmoothBackRight(duration, leftCoef = 0.4 , rightCoef = 0):
     print("Moving smooth back right for "+ str(duration)+" s, "+"leftCoef = "+ str(leftCoef) + ", rightCoef = " + str(rightCoef))
     left.backward(leftCoef)
     right.backward(rightCoef)
